@@ -2,12 +2,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.github.thanlinardos</groupId>
     <artifactId>springsecurity-oauth2</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>springsecurity-oauth2</name>
     <description>springsecurity-oauth2</description>
     <packaging>pom</packaging>
+    <parent>
+        <groupId>io.github.thanlinardos</groupId>
+        <artifactId>spring-enterprise-library</artifactId>
+        <version>1.0.1</version>
+    </parent>
     <modules>
         <module>authorization-server</module>
         <module>cloud-config-server</module>

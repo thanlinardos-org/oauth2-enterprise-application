@@ -17,7 +17,7 @@
 				increment = (settings.to - settings.from) / loops;
 
 			// references & variables that will change with each update
-			let self = this,
+			const $self = $(this),
 				$self = $(this),
 				loopCount = 0,
 				value = settings.from,
@@ -41,7 +41,7 @@
 				render(value);
 				
 				if (typeof(settings.onUpdate) == 'function') {
-					settings.onUpdate.call(self, value);
+					settings.onUpdate.call($self[0], value);
 				}
 				
 				if (loopCount >= loops) {
@@ -51,13 +51,13 @@
 					value = settings.to;
 					
 					if (typeof(settings.onComplete) == 'function') {
-						settings.onComplete.call(self, value);
+						settings.onComplete.call($self[0], value);
 					}
 				}
 			}
 			
 			function render(value) {
-				const formattedValue = settings.formatter.call(self, value, settings);
+				const formattedValue = settings.formatter.call($self[0], value, settings);
 				$self.html(formattedValue);
 			}
 		});

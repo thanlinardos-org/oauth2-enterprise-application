@@ -6,6 +6,8 @@ management:
     refresh:
       access: unrestricted
 spring:
+  main:
+    allow-bean-definition-overriding: true
   application:
     name: cloud-config-server
   profiles:

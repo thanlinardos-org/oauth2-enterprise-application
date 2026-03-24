@@ -31,8 +31,11 @@ public class OwnerService {
 
     @Transactional
     public OwnerModel save(OwnerModel owner) {
-        OwnerJpa entity = OwnerJpa.fromModel(owner);
-        entity = ownerRepository.save(entity);
+        return saveOwner(owner);
+    }
+
+    private OwnerModel saveOwner(OwnerModel owner) {
+        OwnerJpa entity = ownerRepository.save(OwnerJpa.fromModel(owner));
         owner.setId(entity.getId());
         return owner;
     }
@@ -42,7 +45,7 @@ public class OwnerService {
         if (ownerRepository.existsByUuid(owner.getUuid())) {
             return owner;
         } else {
-            return save(owner);
+            return saveOwner(owner);
         }
     }
 

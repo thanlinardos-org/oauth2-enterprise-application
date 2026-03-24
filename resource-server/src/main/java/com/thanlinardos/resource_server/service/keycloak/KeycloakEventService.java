@@ -31,7 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.slf4j.event.Level;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 
@@ -45,15 +44,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static com.thanlinardos.spring_enterprise_library.objects.utils.PredicateUtils.isEqualTo;
-import static java.util.function.Predicate.not;
+import java.util.stream.Stream;
 
 @Slf4j
 @RefreshScope
 @Service
 @RequiredArgsConstructor
-@ConditionalOnExpression("'${scheduling.enabled}'=='true' && '${thanlinardos.springenterpriselibrary.oauth2.auth-server}' == 'KEYCLOAK'")
 public class KeycloakEventService {
 
     private static final String EMAIL = "email";
@@ -70,22 +66,29 @@ public class KeycloakEventService {
     private final OauthRoleService roleService;
 
     @ExcludeFromLoggingAspect
-    public List<EventRepresentationPlaceholder> fetchEvents() {
+    public <T extends EventPlaceholder> List<T> fetchSortedKeycloakEvents() {
+        return getSortedEvents(fetchEvents(), fetchAdminEvents());
+    }
+
+    private <T extends EventPlaceholder> List<T> getSortedEvents(Stream<EventRepresentationPlaceholder> events, Stream<AdminEventRepresentationPlaceholder> adminEvents) {
+        return Stream.concat(((Stream<T>) events), ((Stream<T>) adminEvents))
+                .sorted(Comparator.comparingLong(EventPlaceholder::getTime))
+                .toList();
+    }
+
+    private Stream<EventRepresentationPlaceholder> fetchEvents() {
         String dateFrom = String.valueOf(getLastEventTime() + 1);
         return keycloakRealm.getEvents(null, null, null, dateFrom, null, null, null, MAX_RESULTS).stream()
-                .map(EventRepresentationPlaceholder::new)
-                .toList();
+                .map(EventRepresentationPlaceholder::new);
     }
 
-    @ExcludeFromLoggingAspect
-    public List<AdminEventRepresentationPlaceholder> fetchAdminEvents() {
+    private Stream<AdminEventRepresentationPlaceholder> fetchAdminEvents() {
         String dateFrom = String.valueOf(getLastEventTime() + 1);
         return keycloakRealm.getAdminEvents(null, null, null, null, null, null, null, dateFrom, null, null, MAX_RESULTS).stream()
-                .map(AdminEventRepresentationPlaceholder::new)
-                .toList();
+                .map(AdminEventRepresentationPlaceholder::new);
     }
 
-    public <T extends EventPlaceholder> boolean shouldProcessKeycloakEvent(T event) {
+    private <T extends EventPlaceholder> boolean shouldProcessKeycloakEvent(T event) {
         return switch (event) {
             case AdminEventRepresentationPlaceholder adminEvent -> shouldProcessAdminEvent(adminEvent);
             case EventRepresentationPlaceholder eventPlaceholder -> shouldProcessEvent(eventPlaceholder);
@@ -97,11 +100,11 @@ public class KeycloakEventService {
         return ErrorCode.INVALID_EVENT_CLASS_INSTANCE.createCoreException("An event of unknown class type was provided: {0}", new Object[]{event.getClass().getName()});
     }
 
-    public boolean shouldProcessEvent(EventRepresentationPlaceholder e) {
+    private boolean shouldProcessEvent(EventRepresentationPlaceholder e) {
         return e.getType().shouldProcess() && (isNotProcessed(e) || e.isFailed());
     }
 
-    public boolean shouldProcessAdminEvent(AdminEventRepresentationPlaceholder e) {
+    private boolean shouldProcessAdminEvent(AdminEventRepresentationPlaceholder e) {
         return isNotProcessed(e) || e.isFailed();
     }
 
@@ -123,15 +126,10 @@ public class KeycloakEventService {
         return taskRunService.getTaskRunTime(TaskType.KEYCLOAK_EVENT_TASK);
     }
 
-    public <T extends EventPlaceholder> void updateTaskRunTime(T e) {
-        taskRunService.updateTaskRunTime(e.getTaskType(), e.getTime());
-    }
-
-    public <T extends EventPlaceholder> T saveFailedEvent(T event) {
+    public <T extends EventPlaceholder> void saveEventIfFailed(T event) {
         if (event.isFailed()) {
             saveEvent(event);
         }
-        return event;
     }
 
     private <T extends EventPlaceholder> void saveEvent(T event) {
@@ -144,22 +142,18 @@ public class KeycloakEventService {
         }
     }
 
-    private <T extends EventPlaceholder> List<T> getKeycloakFailedEvents() {
-        return CollectionUtils.combineToList(((List<T>) getFailedEvents()), ((List<T>) getFailedAdminEvents()));
+    private <T extends EventPlaceholder> List<T> getSortedKeycloakFailedEvents() {
+        return getSortedEvents(getFailedEvents(), getFailedAdminEvents());
     }
 
-    @ExcludeFromLoggingAspect
-    public List<EventRepresentationPlaceholder> getFailedEvents() {
+    private Stream<EventRepresentationPlaceholder> getFailedEvents() {
         return eventRepository.findAllByStatusIn(EventStatusType.getFailedStatuses()).stream()
-                .map(EventRepresentationPlaceholder::new)
-                .toList();
+                .map(EventRepresentationPlaceholder::new);
     }
 
-    @ExcludeFromLoggingAspect
-    public List<AdminEventRepresentationPlaceholder> getFailedAdminEvents() {
+    private Stream<AdminEventRepresentationPlaceholder> getFailedAdminEvents() {
         return adminEventRepository.findAllByStatusIn(EventStatusType.getFailedStatuses()).stream()
-                .map(AdminEventRepresentationPlaceholder::new)
-                .toList();
+                .map(AdminEventRepresentationPlaceholder::new);
     }
 
     private <T extends EventPlaceholder> void updateEventToProcessed(T event) {
@@ -175,7 +169,7 @@ public class KeycloakEventService {
 
     @ExcludeFromLoggingAspect
     public <T extends EventPlaceholder> List<T> processFailedEvents() {
-        List<T> failedEvents = getKeycloakFailedEvents();
+        List<T> failedEvents = getSortedKeycloakFailedEvents();
         processEvents(failedEvents, Collections.emptyList());
         return getFailedEvents(failedEvents);
     }
@@ -187,66 +181,77 @@ public class KeycloakEventService {
     }
 
     @ExcludeFromLoggingAspect
-    public <T extends EventPlaceholder> void processEvents(List<T> events, List<T> failedEvents) {
-        events.stream()
-                .sorted(Comparator.comparingLong(EventPlaceholder::getTime))
-                .map(event -> skipIfHasMatchingFailedEvent(failedEvents, event))
-                .filter(Objects::nonNull)
-                .map(this::handleKeycloakEventOrIgnore)
-                .map(this::saveFailedEvent)
-                .filter(not(EventPlaceholder::isFailed))
-                .max(Comparator.comparingLong(EventPlaceholder::getTime))
-                .ifPresent(this::updateTaskRunTime);
+    public <T extends EventPlaceholder> void processEvents(List<T> sortedEvents, List<T> failedEvents) {
+        T latestEvent = null;
+        for (T event : sortedEvents) {
+            if (!skipIfHasMatchingFailedEvent(failedEvents, event)) {
+                latestEvent = processEvent(event, latestEvent);
+            }
+        }
+        updateTaskRunTime(latestEvent);
     }
 
-    @Nullable
-    private <T extends EventPlaceholder> T skipIfHasMatchingFailedEvent(List<T> failedEvents, T event) {
-        if (hasNoMatchingFailedEvent(event, failedEvents)) {
+    private <T extends EventPlaceholder> void updateTaskRunTime(@Nullable T event) {
+        if (event != null) {
+            taskRunService.updateTaskRunTime(event.getTaskType(), event.getTime());
+        }
+    }
+
+    private <T extends EventPlaceholder> T processEvent(T event, T latestEvent) {
+        handleKeycloakEventOrIgnore(event);
+        saveEventIfFailed(event);
+
+        if (isNotFailedAndNewerThanLatestEvent(event, latestEvent)) {
             return event;
+        } else {
+            return latestEvent;
+        }
+    }
+
+    private <T extends EventPlaceholder> boolean isNotFailedAndNewerThanLatestEvent(T event, T latestEvent) {
+        return !event.isFailed() && isNewerThanLatestEvent(event, latestEvent);
+    }
+
+    private <T extends EventPlaceholder> boolean isNewerThanLatestEvent(T event, @Nullable T latestEvent) {
+        return latestEvent == null || latestEvent.getTime() < event.getTime();
+    }
+
+    private <T extends EventPlaceholder> boolean skipIfHasMatchingFailedEvent(List<T> failedEvents, T event) {
+        if (event.noneMatchingResourceIdOrIsNull(failedEvents)) {
+            return false;
         } else {
             return ignoreIfAlreadyFailedOrSaveAsFailed(failedEvents, event);
         }
     }
 
-    @Nullable
-    private <T extends EventPlaceholder> T ignoreIfAlreadyFailedOrSaveAsFailed(List<T> failedEvents, T event) {
-        if (isContainedInEvents(failedEvents, event)) {
+    private <T extends EventPlaceholder> boolean ignoreIfAlreadyFailedOrSaveAsFailed(List<T> failedEvents, T event) {
+        if (event.isContainedInEvents(failedEvents)) {
             logKeycloakEvent(Level.ERROR, event, "Ignored event due to the same existing failed event with uuid", event.getUuid());
             event.setStatus(EventStatusType.IGNORED);
-            return event;
+            return false;
         } else if (event.isNotSkippedAsFailed()) {
             logKeycloakEvent(Level.ERROR, event, "Skipped and saved as failed event due to existing failed event with matching resource id", event.getResourceId());
             event.setStatus(EventStatusType.SKIPPED_AS_FAILED);
-            saveFailedEvent(event);
-            return null;
+            saveEventIfFailed(event);
+            return true;
         } else { // event already skipped as failed
-            return null;
+            return true;
         }
     }
 
-    private <T extends EventPlaceholder> boolean isContainedInEvents(List<T> events, T event) {
-        return CollectionUtils.contains(events, isEqualTo(event.getUuid(), EventPlaceholder::getUuid));
-    }
-
-    private <T extends EventPlaceholder> boolean hasNoMatchingFailedEvent(T event, List<T> newFailedEvents) {
-        return event.getResourceId() == null || newFailedEvents.stream()
-                .noneMatch(isEqualTo(event.getResourceId(), T::getResourceId));
-    }
-
-    private <T extends EventPlaceholder> T handleKeycloakEventOrIgnore(T event) {
+    private <T extends EventPlaceholder> void handleKeycloakEventOrIgnore(T event) {
         if (event.isNotIgnored() && shouldProcessKeycloakEvent(event)) {
-            return switch (event) {
-                case AdminEventRepresentationPlaceholder adminEvent -> (T) tryHandleAdminEvent(adminEvent);
-                case EventRepresentationPlaceholder eventPlaceholder -> (T) tryHandleEvent(eventPlaceholder);
+            switch (event) {
+                case AdminEventRepresentationPlaceholder adminEvent -> tryHandleAdminEvent(adminEvent);
+                case EventRepresentationPlaceholder eventPlaceholder -> tryHandleEvent(eventPlaceholder);
                 default -> throw invalidEventClassException(event);
-            };
+            }
         } else {
             event.setStatus(EventStatusType.IGNORED);
-            return event;
         }
     }
 
-    private EventRepresentationPlaceholder tryHandleEvent(EventRepresentationPlaceholder event) {
+    private void tryHandleEvent(EventRepresentationPlaceholder event) {
         log.trace("Keycloak event: {}", event);
         try {
             handleEvent(event);
@@ -255,7 +260,6 @@ public class KeycloakEventService {
             event.setStatus(EventStatusType.FAILED);
             logEvent(Level.ERROR, event, "Failed to handle event with error", e);
         }
-        return event;
     }
 
     private <T extends EventPlaceholder> void updateEventStatusAfterProcessing(T event) {
@@ -285,7 +289,7 @@ public class KeycloakEventService {
         }
     }
 
-    private AdminEventRepresentationPlaceholder tryHandleAdminEvent(AdminEventRepresentationPlaceholder event) {
+    private void tryHandleAdminEvent(AdminEventRepresentationPlaceholder event) {
         log.trace("Keycloak admin event: {}", event);
         try {
             validateEvent(event);
@@ -300,7 +304,6 @@ public class KeycloakEventService {
             event.setStatus(EventStatusType.FAILED);
             logAdminEvent(Level.ERROR, event, "Failed to handle admin event with error:", e);
         }
-        return event;
     }
 
     private void ignoreResourceType(AdminEventRepresentationPlaceholder event) {

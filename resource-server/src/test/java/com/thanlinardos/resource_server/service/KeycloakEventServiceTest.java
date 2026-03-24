@@ -29,8 +29,7 @@ import static org.mockito.Mockito.when;
 @CoreTest
 class KeycloakEventServiceTest {
 
-    @Spy
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Spy private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Mock private TaskRunService taskRunService;
     @Mock private OauthRoleService roleService;
@@ -65,8 +64,8 @@ class KeycloakEventServiceTest {
     }
 
     private Keycloak mockKeycloak() {
-        Keycloak keycloak = mock(Keycloak.class);
-        when(keycloak.realm(any())).thenReturn(mock(RealmResource.class));
-        return keycloak;
+        Keycloak mocked = mock(Keycloak.class);
+        when(mocked.realm(any())).thenReturn(mock(RealmResource.class));
+        return mocked;
     }
 }

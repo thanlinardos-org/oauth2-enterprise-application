@@ -30,10 +30,12 @@ public class ResourceServerApplication {
 
 	@Bean
 	public CommandLineRunner commandLineRunner() {
-		return args -> {
-			Collection<RoleModel> roles = roleCacheService.getAllRoles();
-			List<Authority> authorities = roleCacheService.getAllAuthorities();
-			log.info("Loaded {} roles and {} authorities", roles.size(), authorities.size());
-		};
+		return args -> onStartUp();
+	}
+
+	private void onStartUp() {
+		Collection<RoleModel> roles = roleCacheService.getAllRoles();
+		List<Authority> authorities = roleCacheService.getAllAuthorities();
+		log.info("Loaded {} roles and {} authorities", roles.size(), authorities.size());
 	}
 }

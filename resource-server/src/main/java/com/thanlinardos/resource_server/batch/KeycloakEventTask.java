@@ -1,9 +1,7 @@
 package com.thanlinardos.resource_server.batch;
 
-import com.thanlinardos.resource_server.batch.keycloak.event.EventPlaceholder;
 import com.thanlinardos.resource_server.batch.keycloak.event.EventRepresentationPlaceholder;
 import com.thanlinardos.resource_server.service.keycloak.KeycloakEventService;
-import com.thanlinardos.spring_enterprise_library.objects.utils.CollectionUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -23,10 +21,6 @@ public class KeycloakEventTask {
     @Scheduled(fixedDelay = 10000)
     public void processEvents() {
         List<EventRepresentationPlaceholder> stillFailingEvents = keycloakEventService.processFailedEvents();
-        keycloakEventService.processEvents(fetchKeycloakEvents(), stillFailingEvents);
-    }
-
-    private <T extends EventPlaceholder> List<T> fetchKeycloakEvents() {
-        return CollectionUtils.combineToList(((List<T>) keycloakEventService.fetchEvents()), ((List<T>) keycloakEventService.fetchAdminEvents()));
+        keycloakEventService.processEvents(keycloakEventService.fetchSortedKeycloakEvents(), stillFailingEvents);
     }
 }
