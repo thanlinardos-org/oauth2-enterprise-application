@@ -1,5 +1,7 @@
 package com.thanlinardos.resource_server.aspect;
 
+import com.thanlinardos.spring_enterprise_library.error.errorcodes.ErrorCode;
+import com.thanlinardos.spring_enterprise_library.error.exceptions.CoreException;
 import com.thanlinardos.spring_enterprise_library.spring_cloud_security.api.service.PrivilegedResourceService;
 import com.thanlinardos.spring_enterprise_library.spring_cloud_security.aspect.AuthorizationAspectHelper;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,10 @@ public class ControllerAuthorizationAspect {
 
     @Around("com.thanlinardos.resource_server.aspect.PointCutDefinitions.forControllerPackage()")
     private Object authorizeControllerOperation(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
-        return AuthorizationAspectHelper.authorizeControllerOperation(proceedingJoinPoint, privilegedResourceService);
+        try {
+            return AuthorizationAspectHelper.authorizeControllerOperation(proceedingJoinPoint, privilegedResourceService);
+        } catch (Exception e) {
+            throw new CoreException(ErrorCode.UNEXPECTED_ERROR, "Error authorizing controller operation", e);
+        }
     }
 }

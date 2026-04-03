@@ -12,6 +12,8 @@ spring:
     name: cloud-config-server
   profiles:
     active: vault
+  jpa:
+    open-in-view: false # Enable for leaving JPA connection open while view rendering with thymeleaf
   cloud.config:
     enabled: true
     server:

@@ -4,11 +4,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>io.github.thanlinardos</groupId>
-		<artifactId>spring-enterprise-library</artifactId>
-		<version>1.0.1</version>
+		<artifactId>springsecurity-oauth2</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>discovery-server</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 	<name>discovery-server</name>
 	<description>discovery-server</description>
 	<url/>
@@ -26,12 +25,13 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<parent-version>1.0.2</parent-version>
 	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>io.github.thanlinardos</groupId>
 			<artifactId>httpsclient</artifactId>
-			<version>1.0.1</version>
+			<version>${parent-version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
 		</dependency>
@@ -98,7 +98,7 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring-boot.version}</version>
+				<version>${spring-boot-plugin.version}</version>
 			</plugin>
 
             <plugin>

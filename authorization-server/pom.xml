@@ -4,12 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.github.thanlinardos</groupId>
-        <artifactId>spring-enterprise-library</artifactId>
-        <version>1.0.1</version>
+        <artifactId>springsecurity-oauth2</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
         <relativePath/>
     </parent>
     <artifactId>authorization-server</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
     <name>authorization-server</name>
     <description>authorization-server</description>
     <url/>
@@ -27,6 +26,7 @@
     </scm>
     <properties>
         <java.version>21</java.version>
+        <parent-version>1.0.2</parent-version>
     </properties>
     <dependencies>
         <dependency>
@@ -149,6 +149,7 @@
                         </exclude>
                     </excludes>
                 </configuration>
+                <version>${spring-boot-plugin.version}</version>
             </plugin>
         </plugins>
     </build>

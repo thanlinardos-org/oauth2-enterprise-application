@@ -4,11 +4,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.github.thanlinardos</groupId>
-        <artifactId>spring-enterprise-library</artifactId>
-        <version>1.0.1</version>
+        <artifactId>springsecurity-oauth2</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
     </parent>
     <artifactId>resource-server</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
     <name>resource-server</name>
     <description>Udemy spring security project for Spring Boot</description>
     <url/>
@@ -28,7 +27,7 @@
         <java.version>21</java.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <jacoco.version>0.8.12</jacoco.version>
+        <parent-version>1.0.2</parent-version>
 
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
@@ -51,12 +50,12 @@
         <dependency>
             <groupId>io.github.thanlinardos</groupId>
             <artifactId>spring-cloud-security</artifactId>
-            <version>1.0.1</version>
+            <version>${parent-version}</version>
         </dependency>
         <dependency>
             <groupId>io.github.thanlinardos</groupId>
             <artifactId>httpsclient</artifactId>
-            <version>1.0.1</version>
+            <version>${parent-version}</version>
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
@@ -151,6 +150,18 @@
         <dependency>
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${jacoco.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.codehaus.plexus</groupId>
+                    <artifactId>plexus-utils</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-utils</artifactId>
+            <version>4.0.3</version>
         </dependency>
         <dependency>
             <groupId>com.mysql</groupId>
@@ -224,6 +235,7 @@
                         -Dspring.profiles.active=prod
                     </jvmArguments>
                 </configuration>
+                <version>${spring-boot-plugin.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
@@ -349,7 +361,7 @@
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.8.7</version>
+                        <version>${jacoco.version}</version>
                         <executions>
                             <execution>
                                 <id>prepare-agent</id>

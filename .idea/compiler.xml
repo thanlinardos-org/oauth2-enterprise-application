@@ -16,6 +16,7 @@
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.44/lombok-1.18.44.jar" />
         </processorPath>
+        <module name="resource-server" />
         <module name="discovery-server" />
         <module name="cloud-config-server" />
         <module name="authorization-server" />

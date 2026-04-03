@@ -3,6 +3,7 @@ package com.thanlinardos.resource_server.controller.rest;
 import com.thanlinardos.resource_server.model.info.ContactMessage;
 import com.thanlinardos.resource_server.service.contact.ContactMessageService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,11 +20,11 @@ public class ContactController {
     private final Random random = new SecureRandom();
 
     @PostMapping("/contact")
-    public ContactMessage saveContactInquiryDetails(@RequestBody ContactMessage contact) {
+    public ResponseEntity<ContactMessage> saveContactInquiryDetails(@RequestBody ContactMessage contact) {
         contact.setContactId(getServiceReqNumber(random));
         contact.setCreateDt(LocalDate.now());
         contactMessageService.saveContactMessage(contact);
-        return contact;
+        return ResponseEntity.ok(contact);
     }
 
     public static String getServiceReqNumber(Random random) {
