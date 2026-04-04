@@ -29,23 +29,25 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let card of cards">
-          <th scope="row">{{card.cardNumber}}</th>
-          <td>{{card.cardType}}</td>
-          <td>{{card.totalLimit | currency}}</td>
-          <td>{{card.amountUsed | currency}}</td>
-          <td>{{card.availableAmount | currency}}</td>
-        </tr>
+        @for (card of cards; track card) {
+          <tr>
+            <th scope="row">{{card.cardNumber}}</th>
+            <td>{{card.cardType}}</td>
+            <td>{{card.totalLimit | currency}}</td>
+            <td>{{card.amountUsed | currency}}</td>
+            <td>{{card.availableAmount | currency}}</td>
+          </tr>
+        }
       </tbody>
     </table>
-    </div>
-    <div class="row mb-5">
-      <div class="col">
-        <div class="">
-          <button class="btn btn-eazybank" routerLink="/dashboard">
-            BACK
-          </button>
-        </div>
+  </div>
+  <div class="row mb-5">
+    <div class="col">
+      <div class="">
+        <button class="btn btn-eazybank" routerLink="/dashboard">
+          BACK
+        </button>
       </div>
     </div>
+  </div>
 </div>

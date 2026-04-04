@@ -3,14 +3,14 @@ import { Contact } from "src/app/model/contact.model";
 import { NgForm, FormsModule } from '@angular/forms';
 import { DashboardService } from 'src/app/services/dashboard/dashboard.service';
 import { HeaderComponent } from '../header/header.component';
-import { NgIf } from '@angular/common';
+
 
 
 @Component({
     selector: 'app-contact',
     templateUrl: './contact.component.html',
     styleUrls: ['./contact.component.css'],
-    imports: [HeaderComponent, NgIf, FormsModule]
+    imports: [HeaderComponent, FormsModule]
 })
 export class ContactComponent implements OnInit {
   model = new Contact();

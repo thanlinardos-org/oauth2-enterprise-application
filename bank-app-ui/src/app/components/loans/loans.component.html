@@ -29,23 +29,25 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let loan of loans">
-          <th scope="row">{{loan.startDt}}</th>
-          <td>{{loan.loanType}}</td>
-          <td>{{loan.totalLoan | currency}}</td>
-          <td>{{loan.amountPaid | currency}}</td>
-          <td>{{loan.outstandingAmount | currency}}</td>
-        </tr>
+        @for (loan of loans; track loan) {
+          <tr>
+            <th scope="row">{{loan.startDt}}</th>
+            <td>{{loan.loanType}}</td>
+            <td>{{loan.totalLoan | currency}}</td>
+            <td>{{loan.amountPaid | currency}}</td>
+            <td>{{loan.outstandingAmount | currency}}</td>
+          </tr>
+        }
       </tbody>
     </table>
-    </div>
-    <div class="row mb-5">
-      <div class="col">
-        <div class="">
-          <button class="btn btn-eazybank" routerLink="/dashboard">
-            BACK
-          </button>
-        </div>
+  </div>
+  <div class="row mb-5">
+    <div class="col">
+      <div class="">
+        <button class="btn btn-eazybank" routerLink="/dashboard">
+          BACK
+        </button>
       </div>
     </div>
+  </div>
 </div>

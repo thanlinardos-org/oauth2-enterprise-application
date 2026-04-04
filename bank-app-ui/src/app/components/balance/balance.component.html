@@ -29,24 +29,26 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let transaction of transactions">
-          <th scope="row">{{transaction.transactionDt}}</th>
-          <td>{{transaction.transactionSummary}}</td>
-          <td>{{transaction.transactionType=='Withdrawal' ? (transaction.transactionAmt | currency) : ' '}}</td>
-          <td>{{transaction.transactionType=='Deposit' ? (transaction.transactionAmt | currency) : ' '}}</td>
-          <td>{{transaction.closingBalance | currency}}</td>
-        </tr>
+        @for (transaction of transactions; track transaction) {
+          <tr>
+            <th scope="row">{{transaction.transactionDt}}</th>
+            <td>{{transaction.transactionSummary}}</td>
+            <td>{{transaction.transactionType=='Withdrawal' ? (transaction.transactionAmt | currency) : ' '}}</td>
+            <td>{{transaction.transactionType=='Deposit' ? (transaction.transactionAmt | currency) : ' '}}</td>
+            <td>{{transaction.closingBalance | currency}}</td>
+          </tr>
+        }
       </tbody>
     </table>
-    </div>
-    <div class="row mb-5">
-      <div class="col">
-        <div class="">
-          <button class="btn btn-eazybank" routerLink="/dashboard">
-            BACK
-          </button>
-        </div>
+  </div>
+  <div class="row mb-5">
+    <div class="col">
+      <div class="">
+        <button class="btn btn-eazybank" routerLink="/dashboard">
+          BACK
+        </button>
       </div>
     </div>
+  </div>
 </div>
 

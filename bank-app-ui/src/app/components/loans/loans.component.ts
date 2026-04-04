@@ -3,14 +3,14 @@ import { Loans } from 'src/app/model/loans.model';
 import { User } from 'src/app/model/user.model';
 import { DashboardService } from '../../services/dashboard/dashboard.service';
 import { HeaderComponent } from '../header/header.component';
-import { NgFor, CurrencyPipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-loans',
     templateUrl: './loans.component.html',
     styleUrls: ['./loans.component.css'],
-    imports: [HeaderComponent, NgFor, RouterLink, CurrencyPipe]
+    imports: [HeaderComponent, RouterLink, CurrencyPipe]
 })
 export class LoansComponent implements OnInit {
 

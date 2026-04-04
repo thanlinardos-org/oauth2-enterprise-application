@@ -3,7 +3,7 @@ import {Cards} from 'src/app/model/cards.model';
 import {User} from 'src/app/model/user.model';
 import {DashboardService} from '../../services/dashboard/dashboard.service';
 import {HeaderComponent} from '../header/header.component';
-import {NgFor, CurrencyPipe} from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import {RouterLink} from '@angular/router';
 
 
@@ -11,7 +11,7 @@ import {RouterLink} from '@angular/router';
     selector: 'app-cards',
     templateUrl: './cards.component.html',
     styleUrls: ['./cards.component.css'],
-    imports: [HeaderComponent, NgFor, RouterLink, CurrencyPipe]
+    imports: [HeaderComponent, RouterLink, CurrencyPipe]
 })
 export class CardsComponent implements OnInit {
 

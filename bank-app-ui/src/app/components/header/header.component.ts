@@ -2,13 +2,13 @@ import {Component, inject, OnInit} from '@angular/core';
 import {User} from 'src/app/model/user.model';
 import Keycloak, {KeycloakProfile} from "keycloak-js";
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { NgIf } from '@angular/common';
+
 
 @Component({
     selector: 'app-header',
     templateUrl: './header.component.html',
     styleUrls: ['./header.component.css'],
-    imports: [RouterLink, RouterLinkActive, NgIf, RouterOutlet]
+    imports: [RouterLink, RouterLinkActive, RouterOutlet]
 })
 export class HeaderComponent implements OnInit {
 

@@ -3,14 +3,14 @@ import { NgForm, FormsModule } from '@angular/forms';
 import {LoginService} from 'src/app/services/login/login.service';
 import {RegisterDetails} from "../../model/registerDetails.model";
 import { HeaderComponent } from '../header/header.component';
-import { NgIf } from '@angular/common';
+
 
 
 @Component({
     selector: 'app-login',
     templateUrl: './register.component.html',
     styleUrls: ['./register.component.css'],
-    imports: [HeaderComponent, NgIf, FormsModule]
+    imports: [HeaderComponent, FormsModule]
 })
 export class RegisterComponent implements OnInit {
     model = new RegisterDetails();
