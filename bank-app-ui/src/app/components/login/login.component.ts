@@ -1,15 +1,18 @@
 import {Component, OnInit} from '@angular/core';
 import {User} from "src/app/model/user.model";
-import {NgForm} from '@angular/forms';
+import { NgForm, FormsModule } from '@angular/forms';
 import {LoginService} from 'src/app/services/login/login.service';
 import {Router} from '@angular/router';
 import {getCookie} from "typescript-cookie";
+import { HeaderComponent } from '../header/header.component';
+import { NgIf } from '@angular/common';
 
 
 @Component({
     selector: 'app-login',
     templateUrl: './login.component.html',
-    styleUrls: ['./login.component.css']
+    styleUrls: ['./login.component.css'],
+    imports: [HeaderComponent, FormsModule, NgIf]
 })
 export class LoginComponent implements OnInit {
     model = new User();

@@ -18,7 +18,7 @@ export class XhrInterceptor implements HttpInterceptor {
             this.user = JSON.parse(sessionStorage.getItem('userdetails')!);
         }
         if (this.user?.details.password && this.user.details.email) {
-            httpHeaders = httpHeaders.append('Authorization', 'Basic ' + window.btoa(this.user.details.email + ':' + this.user.details.password));
+            httpHeaders = httpHeaders.append('Authorization', 'Basic ' + globalThis.btoa(this.user.details.email + ':' + this.user.details.password));
         } else {
             let authorization = sessionStorage.getItem('Authorization');
             if (authorization) {
@@ -41,7 +41,7 @@ export class XhrInterceptor implements HttpInterceptor {
                     if (err.status !== 401) {
                         return;
                     }
-                    if (this.user.authDetails.roles.some(role => role === 'ROLE_USER')) {
+                    if (this.user.authDetails.roles.includes('ROLE_USER')) {
                         this.router.navigate(['dashboard']);
                     } else {
                         this.router.navigate(['home']);

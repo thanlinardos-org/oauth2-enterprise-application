@@ -1,10 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { DashboardService } from 'src/app/services/dashboard/dashboard.service';
+import { HeaderComponent } from '../header/header.component';
+import { NgFor } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 @Component({
-  selector: 'app-notices',
-  templateUrl: './notices.component.html',
-  styleUrls: ['./notices.component.css']
+    selector: 'app-notices',
+    templateUrl: './notices.component.html',
+    styleUrls: ['./notices.component.css'],
+    imports: [HeaderComponent, NgFor, RouterLink]
 })
 export class NoticesComponent implements OnInit {
 

@@ -2,11 +2,14 @@ import {Component, OnInit} from '@angular/core';
 import {DashboardService} from '../../services/dashboard/dashboard.service';
 import {User} from 'src/app/model/user.model';
 import {Account} from 'src/app/model/account.model';
+import { HeaderComponent } from '../header/header.component';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-account',
     templateUrl: './account.component.html',
-    styleUrls: ['./account.component.css']
+    styleUrls: ['./account.component.css'],
+    imports: [HeaderComponent, RouterLink]
 })
 export class AccountComponent implements OnInit {
     user = new User();

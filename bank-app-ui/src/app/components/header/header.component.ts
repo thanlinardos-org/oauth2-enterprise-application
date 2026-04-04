@@ -1,13 +1,14 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {User} from 'src/app/model/user.model';
-import {environment} from "../../../environments/environment";
-import {KeycloakProfile} from "keycloak-js";
-import {KeycloakService} from "keycloak-angular";
+import Keycloak, {KeycloakProfile} from "keycloak-js";
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { NgIf } from '@angular/common';
 
 @Component({
     selector: 'app-header',
     templateUrl: './header.component.html',
-    styleUrls: ['./header.component.css']
+    styleUrls: ['./header.component.css'],
+    imports: [RouterLink, RouterLinkActive, NgIf, RouterOutlet]
 })
 export class HeaderComponent implements OnInit {
 
@@ -16,15 +17,14 @@ export class HeaderComponent implements OnInit {
     public isLoggedIn: boolean = false;
     public userProfile: KeycloakProfile | null = null;
 
-    constructor(private readonly keycloak: KeycloakService) {
-    }
+    private readonly keycloak = inject(Keycloak);
 
     public ngOnInit() {
         void (async () => { // avoid return type SQ warning 'S6544'
-            this.isLoggedIn = this.keycloak.isLoggedIn();
+            this.isLoggedIn = !this.keycloak.loginRequired;
+            this.userProfile = this.keycloak.profile ?? null;
 
-            if (this.isLoggedIn) {
-                this.userProfile = await this.keycloak.loadUserProfile();
+            if (this.userProfile !== null) {
                 this.user.uuid = this.userProfile.id ?? '';
                 this.user.name = this.userProfile.username ?? '';
                 this.user.details.email = this.userProfile.email ?? '';
@@ -32,17 +32,19 @@ export class HeaderComponent implements OnInit {
                 this.user.details.lastName = this.userProfile.lastName ?? '';
                 this.user.details.mobileNumber = (this.userProfile.attributes?.['mobileNumber'] as string[])?.at(0) ?? '';
                 this.user.authDetails.authStatus = 'AUTH';
-                window.sessionStorage.setItem('userdetails', JSON.stringify(this.user));
+                globalThis.sessionStorage.setItem('userdetails', JSON.stringify(this.user));
             }
         })();
     }
 
     public login() {
-        this.keycloak.login({redirectUri: environment.uiUrl + '/dashboard'});
+        this.keycloak.login({redirectUri: globalThis.location.origin + '/dashboard'});
     }
 
     public logout() {
-        this.keycloak.logout(environment.uiUrl + '/home');
+        this.keycloak.logout({
+            redirectUri: globalThis.location.origin + '/home'
+        });
     }
 
 }

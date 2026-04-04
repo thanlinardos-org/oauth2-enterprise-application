@@ -2,12 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { User } from 'src/app/model/user.model';
 import { DashboardService } from '../../services/dashboard/dashboard.service';
 import {AccountTransactions} from "../../model/account.transactions.model";
+import { HeaderComponent } from '../header/header.component';
+import { NgFor, CurrencyPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 
 
 @Component({
-  selector: 'app-balance',
-  templateUrl: './balance.component.html',
-  styleUrls: ['./balance.component.css']
+    selector: 'app-balance',
+    templateUrl: './balance.component.html',
+    styleUrls: ['./balance.component.css'],
+    imports: [HeaderComponent, NgFor, RouterLink, CurrencyPipe]
 })
 export class BalanceComponent implements OnInit {
 
