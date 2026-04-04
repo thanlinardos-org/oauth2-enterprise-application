@@ -32,7 +32,7 @@ export class RegisterComponent implements OnInit {
         }
         this.loginService.registerUser(this.model).subscribe(
             responseData => {
-                this.receivedEmail = <any>responseData.headers.get('Location')?.split('/').pop();
+                this.receivedEmail = responseData.headers.get('Location')?.split('/').pop();
                 registerForm.resetForm();
             });
     }
