@@ -7,6 +7,7 @@ import com.thanlinardos.resource_server.model.mapped.AuthorityModel;
 import com.thanlinardos.resource_server.model.mapped.RoleModel;
 import com.thanlinardos.resource_server.repository.api.AuthorityRepository;
 import com.thanlinardos.resource_server.repository.api.RoleRepository;
+import com.thanlinardos.spring_enterprise_library.model.entity.base.BasicIdJpa;
 import com.thanlinardos.spring_enterprise_library.spring_cloud_security.model.base.Authority;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
@@ -55,8 +56,12 @@ public class RoleCacheService {
     @Transactional
     @CachePut(value = "authorities", key = "#authority.name")
     public Authority addAuthority(AuthorityModel authority) {
-        AuthorityJpa jpa = authorityRepository.save(AuthorityJpa.fromModel(authority));
-        authority.setId(jpa.getId());
+        AuthorityJpa entity = AuthorityJpa.fromModel(authority);
+        authorityRepository.findFirstByName(authority.getName())
+                .map(BasicIdJpa::getId)
+                .ifPresent(entity::setId);
+        entity = authorityRepository.save(entity);
+        authority.setId(entity.getId());
         return authority;
     }
 

@@ -15,14 +15,14 @@ export class LoginService {
 
     validateLoginDetails(user: User) {
         globalThis.sessionStorage.setItem("userdetails", JSON.stringify(user));
-        return this.http.get(environment.rooturl + AppConstants.LOGIN_API_URL, {
+        return this.http.get(environment.rootUrl + AppConstants.LOGIN_API_URL, {
             observe: 'response',
             withCredentials: true
         });
     }
 
     registerUser(registerDetails: RegisterDetails) {
-        return this.http.post(environment.rooturl + AppConstants.REGISTER_API_URL, registerDetails, {
+        return this.http.post(environment.rootUrl + AppConstants.REGISTER_API_URL, registerDetails, {
             observe: 'response',
             withCredentials: true
         });

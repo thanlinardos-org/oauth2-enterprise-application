@@ -49,6 +49,11 @@ public class CustomerController {
         return ResponseEntity.ok(userService.syncAndGetAllCustomers(force));
     }
 
+    @PostMapping("/sync-clients")
+    public ResponseEntity<List<ClientModel>> syncClients(@RequestParam boolean force) {
+        return ResponseEntity.ok(userService.syncAndGetAllClients(force));
+    }
+
     @GetMapping("/clients")
     public ResponseEntity<List<ClientModel>> getClients() {
         return ResponseEntity.ok(clientService.getClients());

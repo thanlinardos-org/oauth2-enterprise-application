@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  rooturl : process.env["ROOT_URL"],
+  rootUrl : process.env["ROOT_URL"],
   uiUrl : process.env["UI_URL"],
   keycloak: {
     config: {

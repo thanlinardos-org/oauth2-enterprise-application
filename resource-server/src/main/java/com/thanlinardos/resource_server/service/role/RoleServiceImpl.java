@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -41,10 +42,9 @@ public class RoleServiceImpl implements OauthRoleService {
                 .collect(Collectors.toSet());
     }
 
-    private Stream<RoleModel> findRoleStream(Collection<String> names) {
-        return names.stream()
-                .map(roleCacheService::getRoleByName)
-                .filter(Objects::nonNull);
+    public Set<RoleModel> findRolesWithoutValidation(Collection<String> names) {
+        return findRoleStream(names, false)
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -53,6 +53,14 @@ public class RoleServiceImpl implements OauthRoleService {
                 .map(RoleModel::getPrivilegeLvl)
                 .min(Integer::compareTo)
                 .orElse(Integer.MAX_VALUE);
+    }
+
+    @Override
+    public Set<RoleModel> getRolesIncludingLowerPrivilegeLvlRoles(Collection<String> names) {
+        Set<RoleModel> roles = new HashSet<>(findRoles(names));
+        Integer privilegeLvl = getMinPrivilegeLvl(roles);
+        roles.addAll(findRolesWithLowerPrivilegeLvl(privilegeLvl));
+        return roles;
     }
 
     @Override
@@ -73,5 +81,29 @@ public class RoleServiceImpl implements OauthRoleService {
     @Override
     public Collection<Authority> getAllAuthorities() {
         return roleCacheService.getAllAuthorities();
+    }
+
+    private Stream<RoleModel> findRoleStream(Collection<String> names) {
+        return findRoleStream(names, true);
+    }
+
+    private Stream<RoleModel> findRoleStream(Collection<String> names, boolean shouldValidateRoles) {
+        return names.stream()
+                .map(roleCacheService::getRoleByName)
+                .map(role -> shouldValidateRoles ? Objects.requireNonNull(role) : role)
+                .filter(role -> shouldValidateRoles || Objects.nonNull(role));
+    }
+
+    private Set<RoleModel> findRolesWithLowerPrivilegeLvl(int privilegeLvl) {
+        return getAllRoles().stream()
+                .filter(role -> role.getPrivilegeLvl() < privilegeLvl)
+                .collect(Collectors.toSet());
+    }
+
+    private Integer getMinPrivilegeLvl(Set<RoleModel> roles) {
+        return roles.stream()
+                .map(RoleModel::getPrivilegeLvl)
+                .min(Integer::compareTo)
+                .orElse(Integer.MAX_VALUE);
     }
 }

@@ -5,14 +5,13 @@ import {LoginService} from 'src/app/services/login/login.service';
 import {Router} from '@angular/router';
 import {getCookie} from "typescript-cookie";
 import {HeaderComponent} from '../header/header.component';
-import {NgIf} from '@angular/common';
 
 
 @Component({
     selector: 'app-login',
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.css'],
-    imports: [HeaderComponent, FormsModule, NgIf]
+    imports: [HeaderComponent, FormsModule]
 })
 export class LoginComponent {
     model = new User();
@@ -33,7 +32,7 @@ export class LoginComponent {
                 const xsrf = getCookie("XSRF-TOKEN")!;
                 globalThis.sessionStorage.setItem("xsrf", xsrf);
 
-                if (this.model.authDetails.roles.some(role => role === 'ROLE_USER')) {
+                if (this.model.authDetails.roles.includes('ROLE_USER')) {
                     this.router.navigate(['dashboard']);
                 } else {
                     this.router.navigate(['home']);

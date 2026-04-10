@@ -13,39 +13,39 @@ export class DashboardService {
   }
 
   getAccountDetails(email: string) {
-    return this.http.get(environment.rooturl + AppConstants.ACCOUNT_API_URL + "?email=" + email, {
+    return this.http.get(environment.rootUrl + AppConstants.ACCOUNT_API_URL + "?email=" + email, {
       observe: 'response',
       withCredentials: true
     });
   }
 
   getAccountTransactions(email: string) {
-    return this.http.get(environment.rooturl + AppConstants.BALANCE_API_URL + "?email=" + email, {
+    return this.http.get(environment.rootUrl + AppConstants.BALANCE_API_URL + "?email=" + email, {
       observe: 'response',
       withCredentials: true
     });
   }
 
   getLoansDetails(email: string) {
-    return this.http.get(environment.rooturl + AppConstants.LOANS_API_URL + "?email=" + email, {
+    return this.http.get(environment.rootUrl + AppConstants.LOANS_API_URL + "?email=" + email, {
       observe: 'response',
       withCredentials: true
     });
   }
 
   getCardsDetails(email: string) {
-    return this.http.get(environment.rooturl + AppConstants.CARDS_API_URL + "?email=" + email, {
+    return this.http.get(environment.rootUrl + AppConstants.CARDS_API_URL + "?email=" + email, {
       observe: 'response',
       withCredentials: true
     });
   }
 
   getNoticeDetails() {
-    return this.http.get(environment.rooturl + AppConstants.NOTICES_API_URL, {observe: 'response'});
+    return this.http.get(environment.rootUrl + AppConstants.NOTICES_API_URL, {observe: 'response'});
   }
 
   saveMessage(contact: Contact) {
-    return this.http.post(environment.rooturl + AppConstants.CONTACT_API_URL, contact, {
+    return this.http.post(environment.rootUrl + AppConstants.CONTACT_API_URL, contact, {
       observe: 'response',
       withCredentials: true
     });

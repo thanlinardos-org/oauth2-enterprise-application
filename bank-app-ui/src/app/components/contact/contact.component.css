@@ -242,13 +242,11 @@ h3.global-title {
   }
 
   button.btn-contact {
-    border: none;
     font-size: 16px;
     padding: 15px 30px;
     margin: 20px auto 0;
     color: #fff;
     background: #57b846;
-    border-color: #57b846;
     display: inline-block;
     font-weight: 400;
     text-align: center;
@@ -258,7 +256,7 @@ h3.global-title {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    border: 1px solid transparent;
+    border: 1px solid #57b846;
     border-radius: 0.25rem;
   }
 

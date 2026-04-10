@@ -44,3 +44,8 @@ services:
 #      - ./keycloak/keycloak.cnf:/opt/keycloak/conf/keycloak.conf
     ports:
       - "8180:8180"
+
+  angularui.local:
+    image: angular-nginx-app
+    ports:
+      - "4200:443"

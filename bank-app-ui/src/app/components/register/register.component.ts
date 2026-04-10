@@ -1,9 +1,8 @@
-import {Component, OnInit} from '@angular/core';
-import { NgForm, FormsModule } from '@angular/forms';
+import {Component} from '@angular/core';
+import {NgForm, FormsModule} from '@angular/forms';
 import {LoginService} from 'src/app/services/login/login.service';
 import {RegisterDetails} from "../../model/registerDetails.model";
-import { HeaderComponent } from '../header/header.component';
-
+import {HeaderComponent} from '../header/header.component';
 
 
 @Component({
@@ -12,18 +11,13 @@ import { HeaderComponent } from '../header/header.component';
     styleUrls: ['./register.component.css'],
     imports: [HeaderComponent, FormsModule]
 })
-export class RegisterComponent implements OnInit {
+export class RegisterComponent {
     model = new RegisterDetails();
     showPassword = false;
     confirmedPassword = '';
     receivedEmail: string | undefined;
 
     constructor(private readonly loginService: LoginService) {
-
-    }
-
-    ngOnInit() {
-        // do nothing
     }
 
     registerUser(registerForm: NgForm) {

@@ -30,7 +30,7 @@ public class OAuth2ServerUserService implements UserService {
     }
 
     @Override
-    public List<ClientModel> syncAndGetAllClients() {
+    public List<ClientModel> syncAndGetAllClients(boolean shouldUpdateExisting) {
         return List.of();
     }
 

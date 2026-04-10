@@ -23,7 +23,7 @@ public class ClientService {
         return Optional.of(clientRepository.findAll().stream()
                 .map(ClientModel::new)
                 .toList())
-                .orElseGet(userService::syncAndGetAllClients);
+                .orElseGet(() -> userService.syncAndGetAllClients(false));
     }
 
     public ClientModel getClientByNameOrFetch(String name) {

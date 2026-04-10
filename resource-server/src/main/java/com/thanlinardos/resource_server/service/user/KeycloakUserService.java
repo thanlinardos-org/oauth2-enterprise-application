@@ -71,11 +71,18 @@ public class KeycloakUserService implements UserService {
     }
 
     @Override
-    public List<ClientModel> syncAndGetAllClients() {
+    public List<ClientModel> syncAndGetAllClients(boolean shouldUpdateExisting) {
         return realm.clients().findAll().stream()
                 .map(ClientRepresentation::getId)
-                .map(this::getClientByUuidAndPersist)
+                .map(this::findClientById)
+                .map(this::mapClientResourceToOwnerModel)
+                .map(shouldUpdateExisting ? ownerService::save : ownerService::saveIfNotExistsByUuid)
+                .map(OwnerModel::getClient)
                 .toList();
+    }
+
+    private OwnerModel mapClientResourceToOwnerModel(ClientResource client) {
+        return mapClientResourceToOwnerModel(client, getServiceAccountRoles(client), client.toRepresentation());
     }
 
     @Nonnull
@@ -246,7 +253,9 @@ public class KeycloakUserService implements UserService {
     @Override
     public ClientModel getClientByUuidAndPersist(String uuid) {
         ClientResource client = findClientById(uuid);
-        return mapAndPersistClientResourceToOwnerModel(client, getServiceAccountRoles(client), client.toRepresentation()).getClient();
+        OwnerModel ownerModel = mapClientResourceToOwnerModel(client);
+        ownerService.save(ownerModel);
+        return ownerModel.getClient();
     }
 
     @Override
@@ -272,10 +281,14 @@ public class KeycloakUserService implements UserService {
     }
 
     private OwnerModel mapAndPersistClientResourceToOwnerModel(ClientResource clientResource, Collection<RoleModel> serviceAccountRoles, ClientRepresentation clientRepresentation) {
+        OwnerModel owner = mapClientResourceToOwnerModel(clientResource, serviceAccountRoles, clientRepresentation);
+        return ownerService.save(owner);
+    }
+
+    private OwnerModel mapClientResourceToOwnerModel(ClientResource clientResource, Collection<RoleModel> serviceAccountRoles, ClientRepresentation clientRepresentation) {
         List<RoleRepresentation> clientRoles = clientResource.roles().list();
         Optional<UserRepresentation> serviceAccountUser = KeycloakServiceUtils.getServiceAccountUser(clientResource);
-        OwnerModel owner = keycloakMappingService.mapClientRepresentationToOwnerModel(null, null, clientRepresentation, clientRoles, serviceAccountUser, serviceAccountRoles);
-        return ownerService.save(owner);
+        return keycloakMappingService.mapClientRepresentationToOwnerModel(null, null, clientRepresentation, clientRoles, serviceAccountUser, serviceAccountRoles);
     }
 
     private UserRepresentation getUserRepresentationByUsername(String username) {
@@ -291,8 +304,10 @@ public class KeycloakUserService implements UserService {
     @Override
     public ClientModel getClientByNameAndPersist(String name) {
         ClientRepresentation clientRepresentation = findClientRepresentationByName(name);
-        ClientResource clientResource = findClientById(clientRepresentation.getId());
-        return mapAndPersistClientResourceToOwnerModel(clientResource, getServiceAccountRoles(clientResource), clientRepresentation).getClient();
+        ClientResource client = findClientById(clientRepresentation.getId());
+        OwnerModel ownerModel = mapClientResourceToOwnerModel(client);
+        ownerService.save(ownerModel);
+        return ownerModel.getClient();
     }
 
     @Override

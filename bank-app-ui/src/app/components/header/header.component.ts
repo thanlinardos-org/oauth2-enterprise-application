@@ -38,7 +38,8 @@ export class HeaderComponent implements OnInit {
     }
 
     public login() {
-        this.keycloak.login({redirectUri: globalThis.location.origin + '/dashboard'});
+        this.keycloak.login({redirectUri: globalThis.location.origin + '/dashboard'})
+            .catch(error => console.error(error));
     }
 
     public logout() {

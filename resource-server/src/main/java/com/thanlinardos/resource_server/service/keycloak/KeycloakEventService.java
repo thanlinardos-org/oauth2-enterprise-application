@@ -428,7 +428,7 @@ public class KeycloakEventService {
 
     public Set<RoleModel> parseRolesFromEvent(AdminEventRepresentationPlaceholder event) {
         Set<String> roleNames = getRolesNamesFromEvent(event);
-        return new HashSet<>(roleService.findRoles(roleNames));
+        return new HashSet<>(roleService.findRolesWithoutValidation(roleNames));
     }
 
     private Set<String> getRolesNamesFromEvent(AdminEventRepresentationPlaceholder event) {

@@ -11,8 +11,6 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
       if (isDevMode()) {
           console.log('Development!');
-      } else {
-          console.log('Production!');
       }
   }
   title = 'bank-app-ui';

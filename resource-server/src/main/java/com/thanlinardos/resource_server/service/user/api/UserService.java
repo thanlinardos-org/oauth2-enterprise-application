@@ -16,7 +16,7 @@ public interface UserService {
 
     List<CustomerModel> syncAndGetAllCustomers(boolean shouldUpdateExisting);
 
-    List<ClientModel> syncAndGetAllClients();
+    List<ClientModel> syncAndGetAllClients(boolean shouldUpdateExisting);
 
     String createGuestCustomer(RegisterCustomerDetails customerDetails);
 

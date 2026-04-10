@@ -1,8 +1,8 @@
 package com.thanlinardos.resource_server.model.entity.owner;
 
-import com.thanlinardos.resource_server.model.entity.role.RoleJpa;
 import com.thanlinardos.resource_server.model.entity.account.AccountJpa;
 import com.thanlinardos.resource_server.model.entity.base.BasicAuditableJpa;
+import com.thanlinardos.resource_server.model.entity.role.RoleJpa;
 import com.thanlinardos.resource_server.model.mapped.OwnerModel;
 import com.thanlinardos.spring_enterprise_library.spring_cloud_security.converters.UUIDConverter;
 import jakarta.annotation.Nullable;
@@ -24,6 +24,7 @@ import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -95,5 +96,13 @@ public class OwnerJpa extends BasicAuditableJpa {
     public void setClientWithLink(ClientJpa client) {
         this.client = client;
         client.setOwner(this);
+    }
+
+    public void setCustomerId(long customerId) {
+        Objects.requireNonNull(this.customer).setId(customerId);
+    }
+
+    public void setClientId(long clientId) {
+        Objects.requireNonNull(this.client).setId(clientId);
     }
 }

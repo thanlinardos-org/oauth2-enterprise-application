@@ -6,11 +6,6 @@
   display: flex;
   position: relative;
 }
-.top-section {
-  display: flex;
-  justify-content: space-between;
-  padding: 20px 0;
-}
 .hleft {
   display: flex;
   align-items: center;
@@ -44,17 +39,6 @@
   margin: 0 auto;
 }
 
-.hleft {
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
-.hleft .logo {
-  margin-right: 18px;
-  padding-left: 18px;
-}
-
 a, a:link:hover, a:visited:hover {
   text-decoration: none;
 }
@@ -69,11 +53,6 @@ a:-webkit-any-link {
   color: -webkit-link;
   cursor: pointer;
   text-decoration: underline;
-}
-
-.hleft .logo img {
-  max-width: 150px;
-  display: block;
 }
 
 img {
@@ -119,10 +98,6 @@ ul, ul li {
   padding-bottom: 8px;
 }
 
-a, a:link:hover, a:visited:hover {
-  text-decoration: none;
-}
-
 .hide {
   display: none !important;
 }
@@ -134,7 +109,6 @@ a, a:link:hover, a:visited:hover {
   display: block;
   margin: 8px auto;
   -webkit-transition: all .3s ease-in-out;
-  -o-transition: all .3s ease-in-out;
   transition: all .3s ease-in-out;
 }
 

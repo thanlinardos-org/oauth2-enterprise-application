@@ -31,13 +31,8 @@ public class OwnerService {
 
     @Transactional
     public OwnerModel save(OwnerModel owner) {
-        return saveOwner(owner);
-    }
-
-    private OwnerModel saveOwner(OwnerModel owner) {
-        OwnerJpa entity = ownerRepository.save(OwnerJpa.fromModel(owner));
-        owner.setId(entity.getId());
-        return owner;
+        OwnerJpa entity = getUpdatedEntity(owner);
+        return saveOwner(owner, entity);
     }
 
     @Transactional
@@ -45,7 +40,8 @@ public class OwnerService {
         if (ownerRepository.existsByUuid(owner.getUuid())) {
             return owner;
         } else {
-            return saveOwner(owner);
+            OwnerJpa entity = OwnerJpa.fromModel(owner);
+            return saveOwner(owner, entity);
         }
     }
 
@@ -55,6 +51,26 @@ public class OwnerService {
         List<RoleJpa> defaultGuestRoles = findDefaultGuestRoles();
         entity.setRoles(defaultGuestRoles);
         entity.setPrivilegeLevel(getDefaultGuestPrivilegeLvl(defaultGuestRoles));
+        return saveOwner(owner, entity);
+    }
+
+    private OwnerJpa getUpdatedEntity(OwnerModel owner) {
+        OwnerJpa entity = OwnerJpa.fromModel(owner);
+        ownerRepository.getFirstByUuid(owner.getUuid())
+                .ifPresent(existing -> setRelatedIds(existing, entity));
+        return entity;
+    }
+
+    private void setRelatedIds(OwnerJpa existing, OwnerJpa updated) {
+        updated.setId(existing.getId());
+        if (existing.getCustomer() != null) {
+            updated.setCustomerId(existing.getCustomer().getId());
+        } else if (existing.getClient() != null) {
+            updated.setClientId(existing.getClient().getId());
+        }
+    }
+
+    private OwnerModel saveOwner(OwnerModel owner, OwnerJpa entity) {
         entity = ownerRepository.save(entity);
         owner.setId(entity.getId());
         return owner;
