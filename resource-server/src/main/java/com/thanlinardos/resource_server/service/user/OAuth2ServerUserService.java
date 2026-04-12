@@ -7,7 +7,6 @@ import com.thanlinardos.resource_server.model.info.RegisterCustomerDetails;
 import com.thanlinardos.resource_server.model.mapped.ClientModel;
 import com.thanlinardos.resource_server.model.mapped.CustomerModel;
 import com.thanlinardos.resource_server.model.mapped.OwnerModel;
-import com.thanlinardos.resource_server.service.owner.OwnerService;
 import com.thanlinardos.resource_server.service.user.api.UserService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,10 +16,7 @@ import java.util.UUID;
 @Slf4j
 public class OAuth2ServerUserService implements UserService {
 
-    private final OwnerService ownerService;
-
-    public OAuth2ServerUserService(OwnerService ownerService, String authServerName) {
-        this.ownerService = ownerService;
+    public OAuth2ServerUserService(String authServerName) {
         log.info("OAuth2ServerUserService created for authorization server: {}", authServerName);
     }
 

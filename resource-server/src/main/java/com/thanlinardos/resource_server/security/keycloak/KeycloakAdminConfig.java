@@ -1,6 +1,7 @@
 package com.thanlinardos.resource_server.security.keycloak;
 
 import com.thanlinardos.resource_server.model.properties.keycloak.KeycloakClientProperties;
+import com.thanlinardos.resource_server.model.properties.keycloak.KeycloakConfigurationProperties;
 import com.thanlinardos.resource_server.model.properties.keycloak.KeycloakProperties;
 import com.thanlinardos.spring_enterprise_library.https.SecureHttpRequestFactory;
 import com.thanlinardos.spring_enterprise_library.https.properties.KeyAndTrustStoreProperties;
@@ -11,13 +12,12 @@ import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.Resource;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.web.client.RestTemplate;
@@ -32,23 +32,18 @@ import java.security.cert.CertificateException;
 
 @Configuration
 @ConditionalOnExpression("'${integration.test.enabled}'=='false' && '${thanlinardos.springenterpriselibrary.oauth2.auth-server}' == 'KEYCLOAK'")
+@EnableConfigurationProperties(KeycloakConfigurationProperties.class)
 @Slf4j
 public class KeycloakAdminConfig {
 
     @Bean
-    @RefreshScope   // TODO: make configuration properties class
-    public KeycloakProperties keycloakProperties(@Value("${thanlinardos.springenterpriselibrary.oauth2.keycloak.url}") String url,
-                                                 @Value("${thanlinardos.springenterpriselibrary.oauth2.keycloak.realm}") String realm,
-                                                 @Value("${thanlinardos.springenterpriselibrary.oauth2.keycloak.client.id}") String clientId,
-                                                 @Value("${thanlinardos.springenterpriselibrary.oauth2.keycloak.client.secret}") String clientSecret,
-                                                 @Value("${thanlinardos.springenterpriselibrary.oauth2.keycloak.client.keystore.path}") Resource keystorePath,
-                                                 @Value("${thanlinardos.springenterpriselibrary.oauth2.keycloak.client.keystore.password}") String keystorePassword,
-                                                 @Value("${thanlinardos.springenterpriselibrary.oauth2.keycloak.client.truststore.path}") Resource truststorePath,
-                                                 @Value("${thanlinardos.springenterpriselibrary.oauth2.keycloak.client.truststore.password}") String truststorePassword) {
-        KeyAndTrustStoreProperties keystore = new KeyAndTrustStoreProperties(keystorePath, keystorePassword);
-        KeyAndTrustStoreProperties truststore = new KeyAndTrustStoreProperties(truststorePath, truststorePassword);
-        KeycloakClientProperties clientProperties = new KeycloakClientProperties(clientId, clientSecret, keystore, truststore);
-        return new KeycloakProperties(url, realm, clientProperties);
+    @RefreshScope
+    public KeycloakProperties keycloakProperties(KeycloakConfigurationProperties props) {
+        KeycloakConfigurationProperties.Client client = props.getClient();
+        KeyAndTrustStoreProperties keystore = new KeyAndTrustStoreProperties(client.getKeystore().getPath(), client.getKeystore().getPassword());
+        KeyAndTrustStoreProperties truststore = new KeyAndTrustStoreProperties(client.getTruststore().getPath(), client.getTruststore().getPassword());
+        KeycloakClientProperties clientProperties = new KeycloakClientProperties(client.getId(), client.getSecret(), keystore, truststore);
+        return new KeycloakProperties(props.getUrl(), props.getRealm(), clientProperties);
     }
 
     @Bean
@@ -71,9 +66,9 @@ public class KeycloakAdminConfig {
 
     @Bean
     @RefreshScope
-    RealmResource keycloakRealm(@Value("${thanlinardos.springenterpriselibrary.oauth2.keycloak.realm}") String realmName, Keycloak keycloak) {
-        log.info("Building Keycloak realm client with name: {}", realmName);
-        return keycloak.realm(realmName);
+    RealmResource keycloakRealm(KeycloakProperties keycloakProperties, Keycloak keycloak) {
+        log.info("Building Keycloak realm client with name: {}", keycloakProperties.getRealm());
+        return keycloak.realm(keycloakProperties.getRealm());
     }
 
     @Bean
