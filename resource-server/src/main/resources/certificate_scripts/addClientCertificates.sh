@@ -91,7 +91,8 @@ for str in "${client_list[@]}"; do
       rm "${BANK_APP_UI_CLASSPATH_RELATIVE_TO_CERT_DIR:?}/$NAME".* || echo "Tried to delete $NAME certs from bank-ap-ui directory but not found." &&
       cp "${NAME}"/"${NAME}".crt "${BANK_APP_UI_CLASSPATH_RELATIVE_TO_CERT_DIR}" &&
       cp "${NAME}"/"${NAME}".key "${BANK_APP_UI_CLASSPATH_RELATIVE_TO_CERT_DIR}" &&
-      echo "Copied $NAME certificates to bank-ap-ui directory."
+      cp intermediate.crt "${BANK_APP_UI_CLASSPATH_RELATIVE_TO_CERT_DIR}" &&
+      echo "Copied $NAME certificates and intermediate.crt to bank-ap-ui directory."
     fi
 done &&
 cd - || exit

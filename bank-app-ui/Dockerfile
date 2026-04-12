@@ -1,5 +1,5 @@
 # Stage 1: Build the Angular application
-FROM node:alpine AS build
+FROM node:24.14.1-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
@@ -7,7 +7,7 @@ COPY package.json package-lock.json ./
 COPY angular.json tsconfig*.json ./
 COPY src/ ./src/
 COPY nginx/ ./nginx
-COPY .env local_angular_ui_client.crt local_angular_ui_client.key ./
+COPY .env ./
 RUN npm run build
 
 # Stage 2: Serve the application with Nginx
@@ -23,15 +23,16 @@ RUN mkdir -p /etc/nginx/ssl && \
     chown -R nginx:nginx /etc/nginx/conf.d && \
     chmod -R 755 /usr/share/nginx/html
 
-# Copy SSL certificates
-COPY local_angular_ui_client.crt /etc/nginx/ssl/local_angular_ui_client.crt
-COPY local_angular_ui_client.key /etc/nginx/ssl/local_angular_ui_client.key
+# Copy SSL certificates (including intermediate CA for mTLS proxy to resource server)
+COPY src/assets/ssl/local_angular_ui_client.crt src/assets/ssl/local_angular_ui_client.key src/assets/ssl/intermediate.crt /etc/nginx/ssl/
 
 RUN chown -R nginx:nginx /etc/nginx/ssl && \
     chown nginx:nginx /etc/nginx/ssl/local_angular_ui_client.crt && \
     chown nginx:nginx /etc/nginx/ssl/local_angular_ui_client.key && \
+    chown nginx:nginx /etc/nginx/ssl/intermediate.crt && \
     chmod 600 /etc/nginx/ssl/local_angular_ui_client.crt && \
-    chmod 600 /etc/nginx/ssl/local_angular_ui_client.key
+    chmod 600 /etc/nginx/ssl/local_angular_ui_client.key && \
+    chmod 600 /etc/nginx/ssl/intermediate.crt
 
 COPY --from=build /app/dist/bank-app-ui /usr/share/nginx/html
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf

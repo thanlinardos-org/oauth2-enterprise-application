@@ -1,52 +1,35 @@
-import {Injectable} from '@angular/core';
-import {HttpInterceptor, HttpRequest, HttpHandler, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
-import {Router} from '@angular/router';
-import {tap} from 'rxjs/operators';
-import {User} from 'src/app/model/user.model';
+import {HttpRequest} from '@angular/common/http';
+import {
+    AutoRefreshTokenService,
+    CUSTOM_BEARER_TOKEN_INTERCEPTOR_CONFIG, provideKeycloak, UserActivityService, withAutoRefreshToken
+} from "keycloak-angular";
+import {environment} from "../../environments/environment";
 
-@Injectable()
-export class XhrInterceptor implements HttpInterceptor {
+export const keycloakProvider = provideKeycloak({
+    config: environment.keycloak.config,
+    initOptions: {
+        onLoad: 'check-sso',
+        silentCheckSsoRedirectUri: globalThis.location.origin + '/silent-check-sso.html',
+        redirectUri: globalThis.location.origin + '/dashboard',
+        // checkLoginIframe: false,
+    },
+    features: [
+        withAutoRefreshToken({
+            onInactivityTimeout: 'logout',
+            sessionTimeout: 1200000
+        })
+    ],
+    providers: [AutoRefreshTokenService, UserActivityService]
+});
 
-    user = new User();
+export const customKeycloakBearerTokenInterceptor = {
+    provide: CUSTOM_BEARER_TOKEN_INTERCEPTOR_CONFIG,
+    useValue: [{
+        shouldAddToken: async (req: HttpRequest<any>, _: any, keycloak: any) => isApiRequestAndAuthenticated(req, keycloak),
+        shouldUpdateToken: (_: HttpRequest<any>) => false
+    }]
+};
 
-    constructor(private readonly router: Router) {
-    }
-
-    intercept(req: HttpRequest<any>, next: HttpHandler) {
-        let httpHeaders = new HttpHeaders();
-        if (sessionStorage.getItem('userdetails')) {
-            this.user = JSON.parse(sessionStorage.getItem('userdetails')!);
-        }
-        if (this.user?.details.password && this.user.details.email) {
-            httpHeaders = httpHeaders.append('Authorization', 'Basic ' + globalThis.btoa(this.user.details.email + ':' + this.user.details.password));
-        } else {
-            const authorization = sessionStorage.getItem('Authorization');
-            if (authorization) {
-                httpHeaders = httpHeaders.append('Authorization', authorization);
-            }
-        }
-
-        const xsrf = sessionStorage.getItem('xsrf');
-        if (xsrf) {
-            httpHeaders = httpHeaders.append('X-XSRF-TOKEN', xsrf);
-        }
-
-        httpHeaders = httpHeaders.append('X-Requested-With', 'XMLHttpRequest');
-        const xhr = req.clone({
-            headers: httpHeaders
-        });
-        return next.handle(xhr).pipe(tap(
-            (err: any) => {
-                if (err instanceof HttpErrorResponse) {
-                    if (err.status !== 401) {
-                        return;
-                    }
-                    if (this.user.authDetails.roles.includes('ROLE_USER')) {
-                        this.router.navigate(['dashboard']);
-                    } else {
-                        this.router.navigate(['home']);
-                    }
-                }
-            }));
-    }
+function isApiRequestAndAuthenticated(req: HttpRequest<any>, keycloak: any) {
+    return environment.apiUrl && req.url.startsWith(environment.apiUrl) && keycloak.authenticated;
 }

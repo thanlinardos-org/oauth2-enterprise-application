@@ -13,7 +13,7 @@
         <li routerLinkActive="active"><a (click)="login()">Login</a></li>
       }
       @if (user.authDetails.authStatus!='AUTH') {
-        <li routerLinkActive="active"><a routerLink="/register">Register</a></li>
+        <li routerLinkActive="active"><a (click)="register()">Register</a></li>
       }
       <li routerLinkActive="active"><a routerLink="/contact">Contact US</a></li>
       <li routerLinkActive="active"><a routerLink="/notices">Notices</a></li>

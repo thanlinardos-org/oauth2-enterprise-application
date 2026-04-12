@@ -7,14 +7,12 @@ import com.thanlinardos.spring_enterprise_library.spring_cloud_security.security
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.stereotype.Component;
-import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 @Component
 @Profile("dev")
@@ -36,11 +34,7 @@ public class SecurityDevConfig extends SecurityCommonConfig<RoleModel> {
     @Order(1)
     @Override
     protected SecurityFilterChain userLoginSecurityFilterChain(HttpSecurity http) throws Exception {
-        http.cors(cors -> cors.configurationSource(request -> buildDevCorsConfiguration()));
+        http.cors(Customizer.withDefaults());
         return super.userLoginSecurityFilterChain(http);
-    }
-
-    private CorsConfiguration buildDevCorsConfiguration() {
-        return buildCorsConfiguration(Collections.singletonList("*"), List.of("Authorization", "Location"), 3600L);
     }
 }

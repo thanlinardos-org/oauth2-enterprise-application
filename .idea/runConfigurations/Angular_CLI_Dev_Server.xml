@@ -5,7 +5,7 @@
     <scripts>
       <script value="start" />
     </scripts>
-    <arguments value="-- --configuration=development --host=angularui.local --open" />
+    <arguments value="-- --configuration=development" />
     <node-interpreter value="project" />
     <envs />
     <method v="2" />

@@ -35,7 +35,7 @@ public class OwnerDetailsInfo implements Serializable, PrivilegedResource {
 
     @Override
     public String getPrincipalName() {
-        return ParserUtil.safeParseString(uuid);
+        return ParserUtil.safeParseString(name);
     }
 
     /**

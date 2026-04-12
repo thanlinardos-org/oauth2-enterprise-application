@@ -45,7 +45,11 @@ export class HeaderComponent implements OnInit {
     public logout() {
         this.keycloak.logout({
             redirectUri: globalThis.location.origin + '/home'
-        });
+        }).catch(error => console.error(error));
     }
 
+    public register() {
+        this.keycloak.register({redirectUri: globalThis.location.origin + '/dashboard'})
+            .catch(error_ => console.error(error_));
+    }
 }

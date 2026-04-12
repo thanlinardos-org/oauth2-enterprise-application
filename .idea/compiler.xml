@@ -18,8 +18,17 @@
         </processorPath>
         <module name="resource-server" />
         <module name="discovery-server" />
-        <module name="cloud-config-server" />
         <module name="authorization-server" />
+      </profile>
+      <profile name="Annotation profile for cloud-config-server" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.44/lombok-1.18.44.jar" />
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.44/lombok-1.18.44.jar" />
+        </processorPath>
+        <module name="cloud-config-server" />
       </profile>
     </annotationProcessing>
   </component>

@@ -31,6 +31,7 @@ services:
               "--https-trust-store-file=/opt/keycloak/conf/truststore.p12",
               "--https-trust-store-password=password",
               "--https-certificates-reload-period=1m",
+              "--proxy-headers=xforwarded",
               "--spi-datastore-legacy-allow-migrate-existing-database-to-snapshot=true" # used to allow database changes in keycloak fork to be migrated
     ]
     networks:
@@ -47,5 +48,7 @@ services:
 
   angularui.local:
     image: angular-nginx-app
+    networks:
+        - vault_default
     ports:
       - "4200:443"
