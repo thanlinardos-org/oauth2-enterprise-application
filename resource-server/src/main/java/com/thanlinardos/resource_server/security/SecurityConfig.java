@@ -5,7 +5,6 @@ import com.thanlinardos.resource_server.service.role.api.OauthRoleService;
 import com.thanlinardos.spring_enterprise_library.spring_cloud_security.model.base.Authority;
 import com.thanlinardos.spring_enterprise_library.spring_cloud_security.security.SecurityCommonConfig;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,12 +14,11 @@ import org.springframework.stereotype.Component;
 import java.util.Collection;
 
 @Component
-@Profile("prod")
-public class SecurityProdConfig extends SecurityCommonConfig<RoleModel> {
+public class SecurityConfig extends SecurityCommonConfig<RoleModel> {
 
     private final OauthRoleService roleService;
 
-    public SecurityProdConfig(OauthRoleService roleService) {
+    public SecurityConfig(OauthRoleService roleService) {
         super(roleService);
         this.roleService = roleService;
     }
