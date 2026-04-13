@@ -1,3 +1,5 @@
+.idea
+**/.mvn
 target
 project-db-files
 datadumps
