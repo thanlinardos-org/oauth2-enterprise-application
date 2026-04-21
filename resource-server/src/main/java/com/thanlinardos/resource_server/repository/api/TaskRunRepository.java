@@ -1,7 +1,7 @@
 package com.thanlinardos.resource_server.repository.api;
 
 import com.thanlinardos.resource_server.model.entity.task.TaskRunJpa;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.thanlinardos.resource_server.repository.base.BasicIdJpaRepository;
 
-public interface TaskRunRepository extends JpaRepository<TaskRunJpa, Long>, CustomTaskRunRepository {
+public interface TaskRunRepository extends BasicIdJpaRepository<TaskRunJpa>, CustomTaskRunRepository {
 }

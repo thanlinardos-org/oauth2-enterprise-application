@@ -86,7 +86,7 @@ public class TestUtils implements WithSecurityContextFactory<WithMockCustomUser>
     }
 
     public static CustomerModel buildTestCustomer(String email) {
-        return CustomerModel.builder()
+        return CustomerModel.builder() //NOSONAR (S3252)
                 .username(email.split("@")[0])
                 .email(email)
                 .firstName("test")
@@ -105,7 +105,7 @@ public class TestUtils implements WithSecurityContextFactory<WithMockCustomUser>
     }
 
     public static OwnerModel buildTestOwner(String email, Set<RoleModel> roles) {
-        return OwnerModel.builder()
+        return OwnerModel.builder() //NOSONAR (S3252)
                 .type(OwnerType.CUSTOMER)
                 .principalName(email)
                 .customer(TestUtils.buildTestCustomer(email))
@@ -147,7 +147,7 @@ public class TestUtils implements WithSecurityContextFactory<WithMockCustomUser>
     }
 
     public static RoleModel buildRole(String name) {
-        return RoleModel.builder()
+        return RoleModel.builder() //NOSONAR (S3252)
                 .role(name)
                 .build();
     }

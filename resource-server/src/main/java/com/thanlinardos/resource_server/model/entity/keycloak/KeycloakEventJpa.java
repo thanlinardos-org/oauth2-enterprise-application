@@ -1,6 +1,5 @@
 package com.thanlinardos.resource_server.model.entity.keycloak;
 
-import com.thanlinardos.resource_server.batch.keycloak.event.EventRepresentationPlaceholder;
 import com.thanlinardos.resource_server.batch.keycloak.event.EventStatusType;
 import com.thanlinardos.resource_server.batch.keycloak.event.KeycloakUserEventType;
 import com.thanlinardos.resource_server.model.entity.keycloak.converter.EventStatusConverter;
@@ -8,7 +7,6 @@ import com.thanlinardos.resource_server.model.entity.keycloak.converter.Keycloak
 import com.thanlinardos.spring_enterprise_library.model.entity.base.BasicIdJpa;
 import com.thanlinardos.spring_enterprise_library.spring_cloud_security.converters.UUIDConverter;
 import com.thanlinardos.spring_enterprise_library.spring_cloud_security.utils.EntityUtils;
-import com.thanlinardos.spring_enterprise_library.time.utils.DateUtils;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -71,22 +69,5 @@ public class KeycloakEventJpa extends BasicIdJpa {
 
     public void addDetailWithLink(KeycloakEventDetailsJpa detail) {
         EntityUtils.addMemberWithLink(this, detail, detail::setKeycloakEvent, details);
-    }
-
-    public static KeycloakEventJpa fromModel(EventRepresentationPlaceholder placeholder) {
-        KeycloakEventJpa entity = KeycloakEventJpa.builder()
-                .time(DateUtils.getLocalDateTimeFromEpochMilli(placeholder.getTime()))
-                .status(placeholder.getStatus())
-                .realmId(placeholder.getRealmId())
-                .error(placeholder.getError())
-                .type(placeholder.getType())
-                .clientId(placeholder.getClientId())
-                .userId(placeholder.getUserId())
-                .build();
-
-        placeholder.getDetails().entrySet().stream()
-                .map(KeycloakEventDetailsJpa::fromModel)
-                .forEach(entity::addDetailWithLink);
-        return entity;
     }
 }

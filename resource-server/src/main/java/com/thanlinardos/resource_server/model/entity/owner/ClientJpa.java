@@ -1,7 +1,6 @@
 package com.thanlinardos.resource_server.model.entity.owner;
 
 import com.thanlinardos.resource_server.model.entity.base.BasicAuditableJpa;
-import com.thanlinardos.resource_server.model.mapped.ClientModel;
 import com.thanlinardos.spring_enterprise_library.spring_cloud_security.converters.UUIDConverter;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -31,16 +30,4 @@ public class ClientJpa extends BasicAuditableJpa {
     private String category;
     @Convert(converter = UUIDConverter.class)
     private UUID serviceAccountId;
-
-    public static ClientJpa fromModel(ClientModel client) {
-        return builder()
-                .id(client.getId())
-                .name(client.getName())
-                .category(client.getCategory())
-                .owner(OwnerJpa.builder()
-                        .id(client.getOwnerId())
-                        .build())
-                .serviceAccountId(client.getServiceAccountId())
-                .build();
-    }
 }

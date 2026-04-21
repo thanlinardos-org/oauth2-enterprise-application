@@ -1,9 +1,8 @@
 package com.thanlinardos.resource_server.model.entity.account;
 
-import com.thanlinardos.resource_server.model.entity.owner.OwnerJpa;
 import com.thanlinardos.resource_server.model.entity.base.BasicManyToOneAccountIdJpa;
 import com.thanlinardos.resource_server.model.entity.base.IndirectlyOwnedEntity;
-import com.thanlinardos.resource_server.model.mapped.AccountTransactionModel;
+import com.thanlinardos.resource_server.model.entity.owner.OwnerJpa;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
@@ -33,16 +32,4 @@ public class AccountTransactionJpa extends BasicManyToOneAccountIdJpa implements
     @Transient
     @Getter
     private OwnerJpa owner;
-
-    public static AccountTransactionJpa fromModel(AccountTransactionModel model) {
-        return builder()
-                .transactionId(model.getTransactionId())
-                .transactionDt(model.getTransactionDt())
-                .transactionSummary(model.getTransactionSummary())
-                .transactionType(model.getTransactionType())
-                .transactionAmt(model.getTransactionAmt())
-                .closingBalance(model.getClosingBalance())
-                .owner(OwnerJpa.fromModel(model.getOwner()))
-                .build();
-    }
 }

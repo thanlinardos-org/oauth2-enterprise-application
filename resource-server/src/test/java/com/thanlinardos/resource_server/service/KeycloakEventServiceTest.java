@@ -2,7 +2,7 @@ package com.thanlinardos.resource_server.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.thanlinardos.resource_server.batch.keycloak.event.AdminEventRepresentationPlaceholder;
+import com.thanlinardos.resource_server.batch.keycloak.event.KeycloakAdminEventModel;
 import com.thanlinardos.resource_server.model.mapped.RoleModel;
 import com.thanlinardos.resource_server.service.keycloak.KeycloakEventService;
 import com.thanlinardos.resource_server.service.role.api.OauthRoleService;
@@ -57,7 +57,7 @@ class KeycloakEventServiceTest {
         role2.setId(UUID.randomUUID().toString());
 
         event.setRepresentation(objectMapper.writeValueAsString(Set.of(role1, role2)));
-        AdminEventRepresentationPlaceholder eventRepresentation = new AdminEventRepresentationPlaceholder(event);
+        KeycloakAdminEventModel eventRepresentation = new KeycloakAdminEventModel(event);
 
         Collection<RoleModel> actual = keycloakEventService.parseRolesFromEvent(eventRepresentation);
         Assertions.assertNotNull(actual);

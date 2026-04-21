@@ -1,6 +1,5 @@
 package com.thanlinardos.resource_server.model.entity.keycloak;
 
-import com.thanlinardos.resource_server.batch.keycloak.event.RoleRepresentationPlaceholder;
 import com.thanlinardos.spring_enterprise_library.model.entity.base.BasicIdJpa;
 import com.thanlinardos.spring_enterprise_library.spring_cloud_security.converters.UUIDConverter;
 import jakarta.persistence.Column;
@@ -39,12 +38,4 @@ public class KeycloakRoleJpa extends BasicIdJpa {
 
     @Column(name = "client_role", nullable = false)
     private boolean clientRole;
-
-    public static KeycloakRoleJpa fromModel(RoleRepresentationPlaceholder placeholder) {
-        return KeycloakRoleJpa.builder()
-                .uuid(placeholder.getUuid())
-                .name(placeholder.getName())
-                .clientRole(placeholder.isClientRole())
-                .build();
-    }
 }

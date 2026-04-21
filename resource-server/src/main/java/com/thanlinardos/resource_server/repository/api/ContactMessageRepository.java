@@ -1,7 +1,7 @@
 package com.thanlinardos.resource_server.repository.api;
 
 import com.thanlinardos.resource_server.model.entity.contact.ContactMessageJpa;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.thanlinardos.resource_server.repository.base.BasicIdJpaRepository;
 
-public interface ContactMessageRepository extends JpaRepository<ContactMessageJpa, Long> {
+public interface ContactMessageRepository extends BasicIdJpaRepository<ContactMessageJpa> {
 }

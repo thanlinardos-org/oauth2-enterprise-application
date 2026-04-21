@@ -17,17 +17,20 @@ import java.util.UUID;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class AdminEventRepresentationPlaceholder extends EventPlaceholder {
+public class KeycloakAdminEventModel extends EventPlaceholder<KeycloakAdminEventJpa> {
 
     private AdminEventOperationType operationType;
     private AdminEventResourceType resourceType;
     private String resourcePath;
-    @Nullable private String representation;
-    private Set<RoleRepresentationPlaceholder> roles = new HashSet<>();
-    @Nullable private UUID resourceId;
-    @Nullable private ResourceIdType resourceIdType;
+    @Nullable
+    private String representation;
+    private Set<KeycloakRoleModel> roles = new HashSet<>();
+    @Nullable
+    private UUID resourceId;
+    @Nullable
+    private ResourceIdType resourceIdType;
 
-    public AdminEventRepresentationPlaceholder(AdminEventRepresentation event) {
+    public KeycloakAdminEventModel(AdminEventRepresentation event) {
         super(UUID.fromString(event.getId()), event.getTime(), EventStatusType.RECEIVED, UUID.fromString(event.getRealmId()), event.getError());
         setOperationType(AdminEventOperationType.fromValue(event.getOperationType()));
         setResourceType(AdminEventResourceType.fromValue(event.getResourceType()));
@@ -37,7 +40,7 @@ public class AdminEventRepresentationPlaceholder extends EventPlaceholder {
         setResourceIdType(parseResourceIdTypeFromPath(resourcePath));
     }
 
-    public AdminEventRepresentationPlaceholder(KeycloakAdminEventJpa entity) {
+    public KeycloakAdminEventModel(KeycloakAdminEventJpa entity) {
         super(entity.getUuid(), entity.getId(), DateUtils.getEpochMilliFromLocalDateTime(entity.getTime()), entity.getStatus(), entity.getRealmId(), entity.getError());
         setOperationType(entity.getOperationType());
         setResourceType(entity.getResourceType());
@@ -75,6 +78,36 @@ public class AdminEventRepresentationPlaceholder extends EventPlaceholder {
         return Optional.ofNullable(resourceIdType)
                 .map(type -> type.equals(ResourceIdType.USERS) ? resourceId : null)
                 .orElse(null);
+    }
+
+    @Override
+    public KeycloakAdminEventJpa toEntityOnlyId() {
+        return KeycloakAdminEventJpa.builder().id(getId()).build(); //NOSONAR (S3252)
+    }
+
+    public KeycloakAdminEventJpa toEntity() {
+        KeycloakAdminEventJpa entity = KeycloakAdminEventJpa.builder() //NOSONAR (S3252)
+                .id(getId())
+                .uuid(getUuid())
+                .time(DateUtils.getLocalDateTimeFromEpochMilli(getTime()))
+                .status(getStatus())
+                .realmId(getRealmId())
+                .error(getError())
+                .clientId(getClientId())
+                .userId(getUserId())
+                .operationType(getOperationType())
+                .resourceType(getResourceType())
+                .resourcePath(getResourcePath())
+                .build();
+        getRoles().stream()
+                .map(KeycloakRoleModel::toEntity)
+                .forEach(entity::addRoleWithLink);
+        return entity;
+    }
+
+    @Override
+    public KeycloakAdminEventModel fromEntity(KeycloakAdminEventJpa entity) {
+        return new KeycloakAdminEventModel(entity);
     }
 
     @Override

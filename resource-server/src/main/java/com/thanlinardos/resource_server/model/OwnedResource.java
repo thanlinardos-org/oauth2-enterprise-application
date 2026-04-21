@@ -11,7 +11,6 @@ public interface OwnedResource<T extends OwnedResource<T>> extends PrivilegedRes
 
     void setOwner(OwnerModel owner);
 
-    @SuppressWarnings("unchecked")
     default T owner(OwnerModel owner) {
         setOwner(owner);
         return (T) this;

@@ -46,14 +46,14 @@ public class BasicAuditableJpa extends BasicIdJpa {
     @Builder.Default
     private String updatedBy = "system";
 
-    public void setTrackedProperties(BasicAuditableModel model) {
+    public <T extends BasicAuditableJpa> void setTrackedProperties(BasicAuditableModel<T> model) {
             setCreatedAt(model.getCreatedAt());
             setCreatedBy(model.getCreatedBy());
             setUpdatedAt(model.getUpdatedAt());
             setUpdatedBy(model.getUpdatedBy());
     }
 
-    public void setTrackedPropertiesWithLink(BasicAuditableModel model) {
+    public <T extends BasicAuditableJpa> void setTrackedPropertiesWithLink(BasicAuditableModel<T> model) {
         setId(model.getId());
         setTrackedProperties(model);
     }

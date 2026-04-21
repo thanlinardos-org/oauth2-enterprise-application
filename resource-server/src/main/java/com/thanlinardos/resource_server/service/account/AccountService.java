@@ -27,7 +27,7 @@ public class AccountService {
     }
 
     private AccountJpa getAccountFromRegisterDetails(RegisterAccountDetails accountDetails) {
-        return AccountJpa.builder()
+        return AccountJpa.builder() //NOSONAR (S3252)
                 .accountNumber(accountDetails.accountNumber())
                 .accountType(accountDetails.accountType())
                 .branchAddress(accountDetails.branchAddress())

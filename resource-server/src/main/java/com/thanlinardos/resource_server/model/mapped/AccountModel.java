@@ -21,7 +21,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @SuperBuilder
-public class AccountModel extends BasicIdModel implements Serializable, OwnedResource<AccountModel> {
+public class AccountModel extends BasicIdModel<AccountJpa, AccountModel> implements Serializable, OwnedResource<AccountModel> {
 
     @ToString.Exclude
     @JsonIgnore
@@ -62,5 +62,30 @@ public class AccountModel extends BasicIdModel implements Serializable, OwnedRes
         this.setCards(entities.stream()
                 .map(CardModel::new)
                 .toList());
+    }
+
+    @Override
+    public AccountJpa toEntityOnlyId() {
+        return AccountJpa.builder().id(getId()).build(); //NOSONAR (S3252)
+    }
+
+    public AccountJpa toEntity() {
+        return AccountJpa.builder() //NOSONAR (S3252)
+                .accountNumber(getAccountNumber())
+                .accountType(getAccountType())
+                .branchAddress(getBranchAddress())
+                .accountTransactions(getAccountTransactions().stream()
+                        .map(AccountTransactionModel::toEntity)
+                        .toList())
+                .cards(getCards().stream()
+                        .map(CardModel::toEntity)
+                        .toList())
+                .owner(getOwner().toEntity())
+                .build();
+    }
+
+    @Override
+    public AccountModel fromEntity(AccountJpa entity) {
+        return new AccountModel(entity);
     }
 }

@@ -1,6 +1,6 @@
 package com.thanlinardos.resource_server.batch;
 
-import com.thanlinardos.resource_server.batch.keycloak.event.EventRepresentationPlaceholder;
+import com.thanlinardos.resource_server.batch.keycloak.event.KeycloakEventModel;
 import com.thanlinardos.resource_server.service.keycloak.KeycloakEventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ public class KeycloakEventTask {
 
     @Scheduled(fixedDelay = 10000)
     public void processEvents() {
-        List<EventRepresentationPlaceholder> stillFailingEvents = keycloakEventService.processFailedEvents();
+        List<KeycloakEventModel> stillFailingEvents = keycloakEventService.processFailedEvents();
         keycloakEventService.processEvents(keycloakEventService.fetchSortedKeycloakEvents(), stillFailingEvents);
     }
 }

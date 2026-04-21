@@ -14,4 +14,5 @@ public abstract class SecurityConstants {
 
     public static final Set<String> DEFAULT_GUEST_ROLES = Set.of("ROLE_GUEST");
     public static final Set<String> DEFAULT_GUEST_ROLES_NO_PREFIX = Set.of("GUEST");
+    public static final String DEFAULT_USER_ROLE = "ROLE_USER";
 }

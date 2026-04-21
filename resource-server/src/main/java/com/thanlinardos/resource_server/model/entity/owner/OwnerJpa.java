@@ -3,7 +3,6 @@ package com.thanlinardos.resource_server.model.entity.owner;
 import com.thanlinardos.resource_server.model.entity.account.AccountJpa;
 import com.thanlinardos.resource_server.model.entity.base.BasicAuditableJpa;
 import com.thanlinardos.resource_server.model.entity.role.RoleJpa;
-import com.thanlinardos.resource_server.model.mapped.OwnerModel;
 import com.thanlinardos.spring_enterprise_library.spring_cloud_security.converters.UUIDConverter;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.CascadeType;
@@ -63,30 +62,6 @@ public class OwnerJpa extends BasicAuditableJpa {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     @Builder.Default
     private List<RoleJpa> roles = new ArrayList<>();
-
-    public static OwnerJpa fromModel(OwnerModel owner) {
-        OwnerJpa entity = builder()
-                .id(owner.getId())
-                .uuid(owner.getUuid())
-                .name(owner.getPrincipalName())
-                .type(owner.getType().toString())
-                .privilegeLevel(owner.getPrivilegeLevel())
-                .roles(owner.getRoles().stream()
-                        .map(RoleJpa::fromModel)
-                        .toList())
-                .build();
-        entity.setTrackedProperties(owner);
-        if (owner.getCustomer() != null) {
-            CustomerJpa customerJpa = CustomerJpa.fromModel(owner.getCustomer());
-            customerJpa.setOwner(entity);
-            entity.setCustomer(customerJpa);
-        } else if (owner.getClient() != null) {
-            ClientJpa clientJpa = ClientJpa.fromModel(owner.getClient());
-            clientJpa.setOwner(entity);
-            entity.setClient(clientJpa);
-        }
-        return entity;
-    }
 
     public void setCustomerWithLink(CustomerJpa customer) {
         this.customer = customer;

@@ -2,9 +2,9 @@ package com.thanlinardos.resource_server.repository;
 
 import com.thanlinardos.resource_server.repository.api.CustomKeycloakEventRepository;
 import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /** IMPORTANT: In order for jpa to pickup custom implementations, they need to follow this exact format as shown in this class: <interface name extending Jpa- or CrudRepository>Impl */
 @RequiredArgsConstructor

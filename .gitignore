@@ -17,3 +17,5 @@ eazybankdev-realm-export.json
 **/bootstrap.esm.js
 **/bootstrap*.map
 **/jquery-*.js
+
+keycloak-themes

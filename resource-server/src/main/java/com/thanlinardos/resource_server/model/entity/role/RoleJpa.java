@@ -1,7 +1,6 @@
 package com.thanlinardos.resource_server.model.entity.role;
 
 import com.thanlinardos.resource_server.model.entity.owner.OwnerJpa;
-import com.thanlinardos.resource_server.model.mapped.RoleModel;
 import com.thanlinardos.spring_enterprise_library.model.entity.base.BasicIdJpa;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -49,17 +48,6 @@ public class RoleJpa extends BasicIdJpa {
     @ToString.Exclude
     @Builder.Default
     private List<AuthorityJpa> authorities = new ArrayList<>();
-
-    public static RoleJpa fromModel(RoleModel role) {
-        return RoleJpa.builder()
-                .id(role.getId())
-                .role(role.getRole())
-                .privilegeLvl(role.getPrivilegeLvl())
-                .authorities(role.getAuthorities().stream()
-                        .map(AuthorityJpa::fromModel)
-                        .toList())
-                .build();
-    }
 
     public void addAuthorityWithLink(AuthorityJpa authority) {
         authorities.add(authority);

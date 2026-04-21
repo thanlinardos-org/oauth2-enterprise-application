@@ -1,5 +1,7 @@
 package com.thanlinardos.resource_server.model.mapped;
 
+import com.thanlinardos.resource_server.model.entity.owner.ClientJpa;
+import com.thanlinardos.resource_server.model.entity.owner.CustomerJpa;
 import com.thanlinardos.resource_server.model.entity.owner.OwnerJpa;
 import com.thanlinardos.resource_server.model.info.Client;
 import com.thanlinardos.resource_server.model.info.Customer;
@@ -24,7 +26,7 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @SuperBuilder
-public class OwnerModel extends BasicAuditableModel implements Serializable, PrivilegedResource {
+public class OwnerModel extends BasicAuditableModel<OwnerJpa> implements Serializable, PrivilegedResource {
 
     private final UUID uuid;
     private String principalName;
@@ -62,7 +64,7 @@ public class OwnerModel extends BasicAuditableModel implements Serializable, Pri
         if (client == null) {
             throw new IllegalArgumentException("Client is null for owner with id " + this.getId());
         }
-        return Client.builder()
+        return Client.builder() //NOSONAR (S3252)
                 .uuid(this.uuid)
                 .serviceAccountId(this.client.getServiceAccountId())
                 .category(this.client.getCategory())
@@ -76,7 +78,7 @@ public class OwnerModel extends BasicAuditableModel implements Serializable, Pri
         if (customer == null) {
             throw ErrorCode.ILLEGAL_ARGUMENT.createCoreException("Customer is null for owner with id {0}", new Object[]{this.getId()});
         }
-        return Customer.builder()
+        return Customer.builder() //NOSONAR (S3252)
                 .uuid(this.uuid)
                 .name(this.customer.getUsername())
                 .email(this.customer.getEmail())
@@ -90,5 +92,39 @@ public class OwnerModel extends BasicAuditableModel implements Serializable, Pri
         return roles.stream()
                 .map(RoleModel::getName)
                 .toList();
+    }
+
+    @Override
+    public OwnerJpa toEntityOnlyId() {
+        return OwnerJpa.builder().id(getId()).build(); //NOSONAR (S3252)
+    }
+
+    public OwnerJpa toEntity() {
+        OwnerJpa entity = OwnerJpa.builder() //NOSONAR (S3252)
+                .id(getId())
+                .uuid(getUuid())
+                .name(getPrincipalName())
+                .type(getType().toString())
+                .privilegeLevel(getPrivilegeLevel())
+                .roles(getRoles().stream()
+                        .map(RoleModel::toEntity)
+                        .toList())
+                .build();
+        entity.setTrackedProperties(this);
+        if (getCustomer() != null) {
+            CustomerJpa customerJpa = getCustomer().toEntity();
+            customerJpa.setOwner(entity);
+            entity.setCustomer(customerJpa);
+        } else if (getClient() != null) {
+            ClientJpa clientJpa = getClient().toEntity();
+            clientJpa.setOwner(entity);
+            entity.setClient(clientJpa);
+        }
+        return entity;
+    }
+
+    @Override
+    public OwnerModel fromEntity(OwnerJpa entity) {
+        return new OwnerModel(entity);
     }
 }

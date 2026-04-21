@@ -1,8 +1,6 @@
 package com.thanlinardos.resource_server.model.entity.account;
 
-import com.thanlinardos.resource_server.model.entity.owner.OwnerJpa;
 import com.thanlinardos.resource_server.model.entity.base.BasicOneToOneOwnedAuditableJpa;
-import com.thanlinardos.resource_server.model.mapped.AccountModel;
 import com.thanlinardos.spring_enterprise_library.spring_cloud_security.utils.EntityUtils;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -59,21 +57,5 @@ public class AccountJpa extends BasicOneToOneOwnedAuditableJpa {
      */
     public void addCardWithLink(CardJpa card) {
         EntityUtils.addMemberWithLink(this, card, card::setAccount, cards);
-    }
-
-    public static AccountJpa fromModel(AccountModel accountModel) {
-        List<AccountTransactionJpa> accountTransactions = accountModel.getAccountTransactions().stream()
-                .map(AccountTransactionJpa::fromModel)
-                .toList();
-        return builder()
-                .accountNumber(accountModel.getAccountNumber())
-                .accountType(accountModel.getAccountType())
-                .branchAddress(accountModel.getBranchAddress())
-                .accountTransactions(accountTransactions)
-                .cards(accountModel.getCards().stream()
-                        .map(CardJpa::fromModel)
-                        .toList())
-                .owner(OwnerJpa.fromModel(accountModel.getOwner()))
-                .build();
     }
 }

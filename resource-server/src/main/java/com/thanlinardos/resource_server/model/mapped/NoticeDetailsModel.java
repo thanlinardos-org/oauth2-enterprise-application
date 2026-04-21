@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @SuperBuilder
-public class NoticeDetailsModel extends BasicIdModel implements Serializable {
+public class NoticeDetailsModel extends BasicIdModel<NoticeDetailsJpa, NoticeDetailsModel> implements Serializable {
 
     private String noticeSummary;
     private String noticeDetails;
@@ -36,5 +36,26 @@ public class NoticeDetailsModel extends BasicIdModel implements Serializable {
         this.setNoticeDetails(entity.getNoticeDetails());
         this.setNoticBegDt(entity.getNoticBegDt());
         this.setNoticEndDt(entity.getNoticEndDt());
+    }
+
+    @Override
+    public NoticeDetailsJpa toEntity() {
+        return NoticeDetailsJpa.builder() //NOSONAR (S3252)
+                .id(getId())
+                .noticeSummary(getNoticeSummary())
+                .noticeDetails(getNoticeDetails())
+                .noticBegDt(getNoticBegDt())
+                .noticEndDt(getNoticEndDt())
+                .build();
+    }
+
+    @Override
+    public NoticeDetailsJpa toEntityOnlyId() {
+        return NoticeDetailsJpa.builder().id(getId()).build(); //NOSONAR (S3252)
+    }
+
+    @Override
+    public NoticeDetailsModel fromEntity(NoticeDetailsJpa entity) {
+        return new NoticeDetailsModel(entity);
     }
 }

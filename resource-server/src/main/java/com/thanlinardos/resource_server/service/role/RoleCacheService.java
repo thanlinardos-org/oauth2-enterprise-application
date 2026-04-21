@@ -7,10 +7,12 @@ import com.thanlinardos.resource_server.model.mapped.AuthorityModel;
 import com.thanlinardos.resource_server.model.mapped.RoleModel;
 import com.thanlinardos.resource_server.repository.api.AuthorityRepository;
 import com.thanlinardos.resource_server.repository.api.RoleRepository;
-import com.thanlinardos.spring_enterprise_library.model.entity.base.BasicIdJpa;
+import com.thanlinardos.resource_server.service.ModelServiceHelper;
+import com.thanlinardos.spring_enterprise_library.objects.utils.CollectionUtils;
 import com.thanlinardos.spring_enterprise_library.spring_cloud_security.model.base.Authority;
 import jakarta.annotation.Nullable;
-import lombok.RequiredArgsConstructor;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -18,13 +20,24 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
-@RequiredArgsConstructor
 public class RoleCacheService {
 
     private final RoleRepository roleRepository;
     private final AuthorityRepository authorityRepository;
+    private final ModelServiceHelper<RoleJpa, RoleModel, AuthorityJpa, AuthorityModel> roleAuthServiceHelper;
+    private final CacheManager cacheManager;
+
+    public RoleCacheService(RoleRepository roleRepository, AuthorityRepository authorityRepository, CacheManager cacheManager) {
+        this.roleRepository = roleRepository;
+        this.authorityRepository = authorityRepository;
+        this.cacheManager = cacheManager;
+        this.roleAuthServiceHelper = new ModelServiceHelper<>(roleRepository, authorityRepository);
+    }
 
     @Transactional(readOnly = true)
     @Cacheable(value = "roles")
@@ -55,23 +68,70 @@ public class RoleCacheService {
 
     @Transactional
     @CachePut(value = "authorities", key = "#authority.name")
-    public Authority addAuthority(AuthorityModel authority) {
-        AuthorityJpa entity = AuthorityJpa.fromModel(authority);
-        authorityRepository.findFirstByName(authority.getName())
-                .map(BasicIdJpa::getId)
-                .ifPresent(entity::setId);
-        entity = authorityRepository.save(entity);
-        authority.setId(entity.getId());
-        return authority;
+    public AuthorityModel saveAuthority(AuthorityModel authority) {
+        return roleAuthServiceHelper.saveOrUpdateSubEntityFoundBy(authority, () -> authorityRepository.findFirstByName(authority.getName()));
     }
 
     @Transactional
-    @CachePut(value = "roles", key = "#role")
-    public RoleModel linkAuthorityToRole(Long id, String role) {
-        RoleJpa roleJpa = roleRepository.findByRole(role)
-                .orElseThrow(() -> new IllegalArgumentException("Role not found from name: " + role));
-        roleJpa.addAuthorityWithLink(AuthorityJpa.builder().id(id).build());
-        roleRepository.save(roleJpa);
-        return new RoleModel(roleJpa);
+    @CachePut(value = "roles", key = "#role.name")
+    public RoleModel linkAuthorityToRole(AuthorityModel authority, RoleModel role) {
+        return roleAuthServiceHelper.linkToModel(role, () -> findByRoleName(role), RoleJpa::getAuthorities, authority.toEntityOnlyId());
+    }
+
+    @Transactional
+    @CachePut(value = "roles", key = "#role.name")
+    public RoleModel unlinkAuthorityFromRole(AuthorityModel authority, RoleModel role) {
+        return roleAuthServiceHelper.unlinkFromModel(role, () -> findByRoleName(role), RoleJpa::getAuthorities, authority.toEntityOnlyId());
+    }
+
+    @Transactional
+    @CachePut(value = "roles", key = "#role.name")
+    public RoleModel createRoleWithAuthorities(RoleModel role, Set<AuthorityModel> newAuthorities, boolean unlinkFromOtherAuthorities) {
+        return roleAuthServiceHelper.createWithLinks(
+                role,
+                role.getAuthorities(),
+                newAuthorities,
+                unlinkFromOtherAuthorities,
+                m -> roleRepository.findByRole(m.getName()),
+                RoleJpa::getAuthorities
+        );
+    }
+
+    @Transactional
+    @CachePut(value = "authorities", key = "#model.name")
+    public AuthorityModel createAuthorityWithRoles(AuthorityModel model, Set<RoleModel> existingRoles, Set<RoleModel> newRoles, boolean unlinkFromOtherRoles) {
+        AuthorityModel result = roleAuthServiceHelper.createSubWithLinks(
+                model,
+                existingRoles,
+                newRoles,
+                unlinkFromOtherRoles,
+                m -> roleRepository.findByRole(m.getName()),
+                RoleJpa::getAuthorities
+        );
+        refreshRoleCache(getChangedRoles(existingRoles, newRoles, unlinkFromOtherRoles));
+        return result;
+    }
+
+    private Set<RoleModel> getChangedRoles(Set<RoleModel> existingRoles, Set<RoleModel> newRoles, boolean unlinkFromOtherRoles) {
+        return unlinkFromOtherRoles ? CollectionUtils.disjunction(existingRoles, newRoles) : newRoles;
+    }
+
+    @Transactional
+    @CachePut(value = "roles", key = "#role.name")
+    public RoleModel saveRole(RoleModel role) {
+        return roleAuthServiceHelper.saveOrUpdateEntityFoundBy(role, () -> findByRoleName(role));
+    }
+
+    private Optional<RoleJpa> findByRoleName(RoleModel role) {
+        return roleRepository.findByRole(role.getName());
+    }
+
+    private void refreshRoleCache(Set<RoleModel> roles) {
+        Cache cache = Objects.requireNonNull(cacheManager.getCache("roles"));
+        for (RoleModel role : roles) {
+            roleRepository.findByRole(role.getName())
+                    .map(RoleModel::new)
+                    .ifPresent(fresh -> cache.put(role.getName(), fresh));
+        }
     }
 }

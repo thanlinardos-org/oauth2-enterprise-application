@@ -1,7 +1,6 @@
 package com.thanlinardos.resource_server.model.entity.owner;
 
 import com.thanlinardos.resource_server.model.entity.base.BasicAuditableJpa;
-import com.thanlinardos.resource_server.model.mapped.CustomerModel;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -36,24 +35,4 @@ public class CustomerJpa extends BasicAuditableJpa {
     private Boolean accountNonLocked = true;
     @Default
     private Boolean credentialsNonExpired = true;
-
-    public static CustomerJpa fromModel(CustomerModel customer) {
-        CustomerJpa entity = builder()
-                .id(customer.getId())
-                .username(customer.getUsername())
-                .email(customer.getEmail())
-                .firstName(customer.getFirstName())
-                .lastName(customer.getLastName())
-                .owner(OwnerJpa.builder()
-                        .id(customer.getOwnerId())
-                        .build())
-                .mobileNumber(customer.getMobileNumber())
-                .enabled(customer.getEnabled())
-                .accountNonExpired(customer.getAccountNonExpired())
-                .accountNonLocked(customer.getAccountNonLocked())
-                .credentialsNonExpired(customer.getCredentialsNonExpired())
-                .build();
-        entity.setTrackedProperties(customer);
-        return entity;
-    }
 }

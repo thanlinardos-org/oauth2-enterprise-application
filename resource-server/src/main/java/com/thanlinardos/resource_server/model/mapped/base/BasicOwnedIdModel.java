@@ -14,13 +14,13 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @SuperBuilder
-public class BasicOwnedIdModel extends BasicIdModel implements OwnedResource<BasicOwnedIdModel> {
+public abstract class BasicOwnedIdModel<T extends BasicIdJpa> extends BasicIdModel<T, BasicOwnedIdModel<T>> implements OwnedResource<BasicOwnedIdModel<T>> {
 
     @ToString.Exclude
     @JsonIgnore
     private OwnerModel owner;
 
-    public BasicOwnedIdModel() {
+    protected BasicOwnedIdModel() {
         super();
     }
 

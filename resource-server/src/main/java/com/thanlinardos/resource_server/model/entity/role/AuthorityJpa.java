@@ -1,6 +1,5 @@
 package com.thanlinardos.resource_server.model.entity.role;
 
-import com.thanlinardos.resource_server.model.mapped.AuthorityModel;
 import com.thanlinardos.spring_enterprise_library.model.entity.base.BasicIdJpa;
 import com.thanlinardos.spring_enterprise_library.spring_cloud_security.model.types.AccessType;
 import jakarta.annotation.Nullable;
@@ -52,15 +51,4 @@ public class AuthorityJpa extends BasicIdJpa {
     @ToString.Exclude
     @Builder.Default
     private List<RoleJpa> roles = new ArrayList<>();
-
-    public static AuthorityJpa fromModel(AuthorityModel model) {
-        return builder()
-                .name(model.getName())
-                .accessType(model.getAccess())
-                .expression(model.getExpression())
-                .uri(model.getUri())
-                .build();
-    }
 }
-
-

@@ -46,7 +46,7 @@ public class KeycloakMappingService {
         Set<RoleModel> roleModels = getRoleModels(userRoles);
         int privilegeLevel = PrivilegedResource.calcPrivilegeLvlFromRoles(roleModels);
         LocalDateTime createdAt = DateUtils.getLocalDateTimeFromEpochMilli(user.getCreatedTimestamp());
-        return OwnerModel.builder()
+        return OwnerModel.builder() //NOSONAR (S3252)
                 .id(ownerId)
                 .uuid(UUID.fromString(user.getId()))
                 .principalName(user.getEmail())
@@ -63,7 +63,7 @@ public class KeycloakMappingService {
 
     public Customer mapUserRepresentationToCustomer(List<RoleRepresentation> userRoles, UserRepresentation user) {
         LocalDate createdAt = getLocalDateFromEpochMilli(user.getCreatedTimestamp());
-        return Customer.builder()
+        return Customer.builder() //NOSONAR (S3252)
                 .name(user.getUsername())
                 .email(user.getEmail())
                 .createDt(createdAt)
@@ -73,7 +73,7 @@ public class KeycloakMappingService {
 
     public Client mapClientRepresentationToClient(List<RoleRepresentation> userRoles, ClientRepresentation client, UserRepresentation serviceAccountUser) {
         LocalDate createdAt = getLocalDateFromEpochMilli(serviceAccountUser.getCreatedTimestamp());
-        return Client.builder()
+        return Client.builder() //NOSONAR (S3252)
                 .name(client.getClientId())
                 .createDt(createdAt)
                 .roles(getRoleModels(userRoles))
@@ -93,7 +93,7 @@ public class KeycloakMappingService {
         LocalDateTime createdAt = getServiceAccountUserCreatedAtOrNow(serviceAccountUser);
         String serviceAccountId = getServiceAccountId(serviceAccountUser);
 
-        return OwnerModel.builder()
+        return OwnerModel.builder() //NOSONAR (S3252)
                 .id(ownerId)
                 .uuid(UUID.fromString(client.getId()))
                 .principalName(client.getClientId())

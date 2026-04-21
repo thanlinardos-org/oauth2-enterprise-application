@@ -52,7 +52,7 @@ public class KeycloakAdminConfig {
         log.info("Building Keycloak admin client");
         KeycloakClientProperties clientProperties = keycloakProperties.getClient();
         SSLContext sslContext = SslContextUtil.buildSSLContext(clientProperties.keystore(), clientProperties.truststore());
-        return KeycloakBuilder.builder()
+        return KeycloakBuilder.builder() //NOSONAR (S3252)
                 .serverUrl(keycloakProperties.getUrl())
                 .realm(keycloakProperties.getRealm())
                 .grantType(OAuth2Constants.CLIENT_CREDENTIALS)

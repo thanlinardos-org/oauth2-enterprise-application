@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @SuperBuilder
-public class LoanModel extends BasicOwnedIdModel implements Serializable {
+public class LoanModel extends BasicOwnedIdModel<LoanJpa> implements Serializable {
 
     private LocalDate startDt;
     private String loanType;
@@ -32,5 +32,27 @@ public class LoanModel extends BasicOwnedIdModel implements Serializable {
         this.setAmountPaid(entity.getAmountPaid());
         this.setOutstandingAmount(entity.getOutstandingAmount());
         this.setOwner(new OwnerModel(entity.getOwner()));
+    }
+
+    @Override
+    public LoanJpa toEntityOnlyId() {
+        return LoanJpa.builder().id(getId()).build(); //NOSONAR (S3252)
+    }
+
+    public LoanJpa toEntity() {
+        return LoanJpa.builder() //NOSONAR (S3252)
+                .id(getId())
+                .startDt(getStartDt())
+                .loanType(getLoanType())
+                .totalLoan(getTotalLoan())
+                .amountPaid(getAmountPaid())
+                .outstandingAmount(getOutstandingAmount())
+                .owner(getOwner() != null ? getOwner().toEntity() : null)
+                .build();
+    }
+
+    @Override
+    public BasicOwnedIdModel<LoanJpa> fromEntity(LoanJpa entity) {
+        return new LoanModel(entity);
     }
 }

@@ -46,11 +46,11 @@ class ClientServiceTest {
         return Stream.of(
                 Arguments.of("empty list", Collections.emptyList()),
                 Arguments.of("has clients", List.of(
-                        ClientModel.builder()
+                        ClientModel.builder() //NOSONAR (S3252)
                                 .id(1L)
                                 .name("client1")
                                 .build(),
-                        ClientModel.builder()
+                        ClientModel.builder() //NOSONAR (S3252)
                                 .id(2L)
                                 .name("client2")
                                 .build()
@@ -68,14 +68,14 @@ class ClientServiceTest {
 
     private static List<ClientJpa> getEntities(List<ClientModel> expected) {
         return expected.stream()
-                .map(ClientJpa::fromModel)
+                .map(ClientModel::toEntity)
                 .toList();
     }
 
     @Test
     void getClientByNameOrFetch() {
         String clientName = "testClient";
-        ClientJpa clientJpa = ClientJpa.builder().name(clientName).owner(OwnerJpa.builder().id(1L).build()).build();
+        ClientJpa clientJpa = ClientJpa.builder().name(clientName).owner(OwnerJpa.builder().id(1L).build()).build(); //NOSONAR (S3252)
         when(clientRepository.getFirstByName(anyString())).thenReturn(Optional.of(clientJpa));
 
         ClientModel expected = new ClientModel(clientJpa);
@@ -87,7 +87,7 @@ class ClientServiceTest {
     @Test
     void getClientInfoByNameOrFetch() {
         String clientName = "testClient";
-        ClientJpa clientJpa = ClientJpa.builder().name(clientName).owner(buildOwnerWithClient(clientName)).build();
+        ClientJpa clientJpa = ClientJpa.builder().name(clientName).owner(buildOwnerWithClient(clientName)).build(); //NOSONAR (S3252)
         when(clientRepository.getFirstByName(anyString())).thenReturn(Optional.of(clientJpa));
 
         Client client = clientService.getClientInfoByNameOrFetch(clientName);
@@ -95,8 +95,8 @@ class ClientServiceTest {
     }
 
     private OwnerJpa buildOwnerWithClient(String clientName) {
-        ClientJpa client = ClientJpa.builder().name(clientName).build();
-        OwnerJpa owner = OwnerJpa.builder().id(1L).type("CLIENT").client(client).createdAt(CREATED_AT).build();
+        ClientJpa client = ClientJpa.builder().name(clientName).build(); //NOSONAR (S3252)
+        OwnerJpa owner = OwnerJpa.builder().id(1L).type("CLIENT").client(client).createdAt(CREATED_AT).build(); //NOSONAR (S3252)
         client.setOwner(owner);
         return owner;
     }

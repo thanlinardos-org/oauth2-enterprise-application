@@ -4,6 +4,7 @@ import com.thanlinardos.resource_server.model.constants.SecurityConstants;
 import com.thanlinardos.resource_server.model.entity.owner.OwnerJpa;
 import com.thanlinardos.resource_server.model.entity.role.RoleJpa;
 import com.thanlinardos.resource_server.model.mapped.OwnerModel;
+import com.thanlinardos.resource_server.model.mapped.RoleModel;
 import com.thanlinardos.resource_server.repository.api.OwnerRepository;
 import com.thanlinardos.resource_server.service.role.RoleServiceImpl;
 import com.thanlinardos.spring_enterprise_library.error.errorcodes.ErrorCode;
@@ -40,14 +41,14 @@ public class OwnerService {
         if (ownerRepository.existsByUuid(owner.getUuid())) {
             return owner;
         } else {
-            OwnerJpa entity = OwnerJpa.fromModel(owner);
+            OwnerJpa entity = owner.toEntity();
             return saveOwner(owner, entity);
         }
     }
 
     @Transactional
     public OwnerModel saveGuest(OwnerModel owner) {
-        OwnerJpa entity = OwnerJpa.fromModel(owner);
+        OwnerJpa entity = owner.toEntity();
         List<RoleJpa> defaultGuestRoles = findDefaultGuestRoles();
         entity.setRoles(defaultGuestRoles);
         entity.setPrivilegeLevel(getDefaultGuestPrivilegeLvl(defaultGuestRoles));
@@ -55,7 +56,7 @@ public class OwnerService {
     }
 
     private OwnerJpa getUpdatedEntity(OwnerModel owner) {
-        OwnerJpa entity = OwnerJpa.fromModel(owner);
+        OwnerJpa entity = owner.toEntity();
         ownerRepository.getFirstByUuid(owner.getUuid())
                 .ifPresent(existing -> setRelatedIds(existing, entity));
         return entity;
@@ -96,7 +97,7 @@ public class OwnerService {
 
     private List<RoleJpa> findDefaultGuestRoles() {
         return roleService.findRoles(SecurityConstants.DEFAULT_GUEST_ROLES).stream()
-                .map(RoleJpa::fromModel)
+                .map(RoleModel::toEntity)
                 .toList();
     }
 

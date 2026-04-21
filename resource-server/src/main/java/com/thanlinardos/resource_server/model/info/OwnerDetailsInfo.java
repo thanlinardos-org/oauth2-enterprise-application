@@ -30,7 +30,7 @@ public class OwnerDetailsInfo implements Serializable, PrivilegedResource {
 
     @Override
     public int getPrivilegeLevel() {
-        return PrivilegedResource.calcPrivilegeLvlFromRoles(getRoles());
+        return PrivilegedResource.calcPrivilegeLvlFromRoles(getRoles()); // TODO fix: always gives 0 privilege level, because roles arent fetched from service
     }
 
     @Override
@@ -44,7 +44,7 @@ public class OwnerDetailsInfo implements Serializable, PrivilegedResource {
      * @return A set of role names.
      */
     @JsonIgnore
-    public Set<String> getRoleNames() {
+    public Set<String> getRoleNames() { // TODO fix: always gives 0 privilege level, because roles arent fetched from service
         return getRoles().stream()
                 .map(RoleModel::getName)
                 .collect(Collectors.toSet());

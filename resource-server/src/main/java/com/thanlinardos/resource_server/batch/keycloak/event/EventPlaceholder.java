@@ -1,6 +1,7 @@
 package com.thanlinardos.resource_server.batch.keycloak.event;
 
 import com.thanlinardos.resource_server.model.info.TaskType;
+import com.thanlinardos.spring_enterprise_library.model.entity.base.BasicIdJpa;
 import com.thanlinardos.spring_enterprise_library.model.mapped.base.BasicIdModel;
 import com.thanlinardos.spring_enterprise_library.objects.utils.CollectionUtils;
 import jakarta.annotation.Nullable;
@@ -21,7 +22,7 @@ import static com.thanlinardos.spring_enterprise_library.objects.utils.Predicate
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public abstract class EventPlaceholder extends BasicIdModel {
+public abstract class EventPlaceholder<T extends BasicIdJpa> extends BasicIdModel<T, EventPlaceholder<T>> {
 
     private UUID uuid;
     private long time;
@@ -69,28 +70,28 @@ public abstract class EventPlaceholder extends BasicIdModel {
      * Checks if none of the given events match the resourceId of this {@link EventPlaceholder}, or if the resourceId is null.
      *
      * @param events the given {@link EventPlaceholder}s to match against.
-     * @param <T>    the type of {@link EventPlaceholder}.
+     * @param <E>    the type of {@link EventPlaceholder}.
      * @return true if none of the given events match the resourceId of this {@link EventPlaceholder} or if the resourceId is null, otherwise false.
      */
-    public <T extends EventPlaceholder> boolean noneMatchingResourceIdOrIsNull(List<T> events) {
+    public <E extends EventPlaceholder<T>> boolean noneMatchingResourceIdOrIsNull(List<E> events) {
         return Optional.ofNullable(getResourceId())
                 .map(id -> noneMatchingResourceId(events))
                 .orElse(true);
     }
 
-    public <T extends EventPlaceholder> boolean noneMatchingResourceId(List<T> events) {
+    public <E extends EventPlaceholder<T>> boolean noneMatchingResourceId(List<E> events) {
         return events.stream()
-                .noneMatch(isEqualTo(getResourceId(), T::getResourceId));
+                .noneMatch(isEqualTo(getResourceId(), E::getResourceId));
     }
 
     /**
      * Checks if this event is contained in the given list of {@link EventPlaceholder}s, by checking its UUID.
      *
      * @param events the given {@link EventPlaceholder}s.
-     * @param <T>    the type of {@link EventPlaceholder}.
+     * @param <E>    the type of {@link EventPlaceholder}.
      * @return true if this event is contained in the given list of {@link EventPlaceholder}s, otherwise false.
      */
-    public <T extends EventPlaceholder> boolean isContainedInEvents(List<T> events) {
+    public <E extends EventPlaceholder<T>> boolean isContainedInEvents(List<E> events) {
         return CollectionUtils.contains(events, isEqualTo(getUuid(), EventPlaceholder::getUuid));
     }
 }

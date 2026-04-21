@@ -18,7 +18,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @SuperBuilder
-public class AccountTransactionModel extends BasicIdModel implements Serializable, OwnedResource<AccountTransactionModel> {
+public class AccountTransactionModel extends BasicIdModel<AccountTransactionJpa, AccountTransactionModel> implements Serializable, OwnedResource<AccountTransactionModel> {
 
     private UUID transactionId;
     private Long accountId;
@@ -41,5 +41,27 @@ public class AccountTransactionModel extends BasicIdModel implements Serializabl
         this.closingBalance = entity.getClosingBalance();
         this.accountId = entity.getAccount().getId();
         this.owner = new OwnerModel(entity.getAccount().getOwner());
+    }
+
+    @Override
+    public AccountTransactionJpa toEntityOnlyId() {
+        return AccountTransactionJpa.builder().id(getId()).build(); //NOSONAR (S3252)
+    }
+
+    public AccountTransactionJpa toEntity() {
+        return AccountTransactionJpa.builder() //NOSONAR (S3252)
+                .transactionId(getTransactionId())
+                .transactionDt(getTransactionDt())
+                .transactionSummary(getTransactionSummary())
+                .transactionType(getTransactionType())
+                .transactionAmt(getTransactionAmt())
+                .closingBalance(getClosingBalance())
+                .owner(getOwner().toEntity())
+                .build();
+    }
+
+    @Override
+    public AccountTransactionModel fromEntity(AccountTransactionJpa entity) {
+        return new AccountTransactionModel(entity);
     }
 }

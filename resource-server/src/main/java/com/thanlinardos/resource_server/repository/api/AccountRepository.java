@@ -1,11 +1,11 @@
 package com.thanlinardos.resource_server.repository.api;
 
 import com.thanlinardos.resource_server.model.entity.account.AccountJpa;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.thanlinardos.resource_server.repository.base.BasicIdJpaRepository;
 
 import java.util.Optional;
 
-public interface AccountRepository extends JpaRepository<AccountJpa, Long> {
+public interface AccountRepository extends BasicIdJpaRepository<AccountJpa> {
 
     Optional<AccountJpa> findByAccountNumber(long accountNumber);
 

@@ -57,7 +57,7 @@ public class KeycloakServiceUtils {
 
     public static CustomerModel mapUserRepresentationToCustomerModel(UserRepresentation user, Integer privilegeLevel, @Nullable Long id) {
         LocalDateTime createdAt = LocalDateTime.ofEpochSecond(user.getCreatedTimestamp(), 0, ZoneOffset.UTC);
-        return CustomerModel.builder()
+        return CustomerModel.builder() //NOSONAR (S3252)
                 .id(id)
                 .username(user.getUsername())
                 .uuid(UUID.fromString(user.getId()))
@@ -82,7 +82,7 @@ public class KeycloakServiceUtils {
     }
 
     public static ClientModel mapClientRepresentationToClientModel(ClientRepresentation client, Integer privilegeLevel, LocalDateTime createdAt, @Nullable String serviceAccountId, @Nullable Long id) {
-        return ClientModel.builder()
+        return ClientModel.builder() //NOSONAR (S3252)
                 .id(id)
                 .uuid(UUID.fromString(client.getId()))
                 .serviceAccountId(ParserUtil.safeParseUUID(serviceAccountId))

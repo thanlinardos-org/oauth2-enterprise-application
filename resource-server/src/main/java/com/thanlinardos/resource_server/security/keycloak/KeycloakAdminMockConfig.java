@@ -30,7 +30,7 @@ public class KeycloakAdminMockConfig {
 
     @Bean
     Keycloak keycloak() {
-        return KeycloakBuilder.builder()
+        return KeycloakBuilder.builder() //NOSONAR (S3252)
                 .serverUrl(authServerUrl)
                 .realm(realm)
                 .grantType(OAuth2Constants.CLIENT_CREDENTIALS)

@@ -1,7 +1,6 @@
 package com.thanlinardos.resource_server.model.entity.keycloak;
 
 import com.thanlinardos.resource_server.batch.keycloak.event.AdminEventOperationType;
-import com.thanlinardos.resource_server.batch.keycloak.event.AdminEventRepresentationPlaceholder;
 import com.thanlinardos.resource_server.batch.keycloak.event.AdminEventResourceType;
 import com.thanlinardos.resource_server.batch.keycloak.event.EventStatusType;
 import com.thanlinardos.resource_server.model.entity.keycloak.converter.AdminEventOperationTypeConverter;
@@ -10,7 +9,6 @@ import com.thanlinardos.resource_server.model.entity.keycloak.converter.EventSta
 import com.thanlinardos.spring_enterprise_library.model.entity.base.BasicIdJpa;
 import com.thanlinardos.spring_enterprise_library.spring_cloud_security.converters.UUIDConverter;
 import com.thanlinardos.spring_enterprise_library.spring_cloud_security.utils.EntityUtils;
-import com.thanlinardos.spring_enterprise_library.time.utils.DateUtils;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -81,26 +79,6 @@ public class KeycloakAdminEventJpa extends BasicIdJpa {
     @ToString.Exclude
     @Builder.Default
     private List<KeycloakRoleJpa> roles = new ArrayList<>();
-
-    public static KeycloakAdminEventJpa fromModel(AdminEventRepresentationPlaceholder event) {
-        KeycloakAdminEventJpa entity = builder()
-                .id(event.getId())
-                .uuid(event.getUuid())
-                .time(DateUtils.getLocalDateTimeFromEpochMilli(event.getTime()))
-                .status(event.getStatus())
-                .realmId(event.getRealmId())
-                .error(event.getError())
-                .clientId(event.getClientId())
-                .userId(event.getUserId())
-                .operationType(event.getOperationType())
-                .resourceType(event.getResourceType())
-                .resourcePath(event.getResourcePath())
-                .build();
-        event.getRoles().stream()
-                .map(KeycloakRoleJpa::fromModel)
-                .forEach(entity::addRoleWithLink);
-        return entity;
-    }
 
     public void addRoleWithLink(KeycloakRoleJpa role) {
         EntityUtils.addMemberWithLink(this, role, role::setKeycloakAdminEvent, roles);

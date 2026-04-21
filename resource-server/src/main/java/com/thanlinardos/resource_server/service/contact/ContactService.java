@@ -43,7 +43,7 @@ public class ContactService {
     }
 
     private ContactMessageJpa fromContact(Contact contact) {
-        return ContactMessageJpa.builder()
+        return ContactMessageJpa.builder() //NOSONAR (S3252)
                 .contactEmail(contact.getEmail())
                 .message(contact.getMessage())
                 .contactName(contact.getName())

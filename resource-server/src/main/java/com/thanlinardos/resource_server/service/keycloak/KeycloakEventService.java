@@ -3,14 +3,12 @@ package com.thanlinardos.resource_server.service.keycloak;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.thanlinardos.resource_server.aspect.annotation.ExcludeFromLoggingAspect;
-import com.thanlinardos.resource_server.batch.keycloak.event.AdminEventRepresentationPlaceholder;
+import com.thanlinardos.resource_server.batch.keycloak.event.KeycloakAdminEventModel;
 import com.thanlinardos.resource_server.batch.keycloak.event.EventPlaceholder;
-import com.thanlinardos.resource_server.batch.keycloak.event.EventRepresentationPlaceholder;
+import com.thanlinardos.resource_server.batch.keycloak.event.KeycloakEventModel;
 import com.thanlinardos.resource_server.batch.keycloak.event.EventStatusType;
 import com.thanlinardos.resource_server.batch.keycloak.event.ResourceIdType;
-import com.thanlinardos.resource_server.batch.keycloak.event.RoleRepresentationPlaceholder;
-import com.thanlinardos.resource_server.model.entity.keycloak.KeycloakAdminEventJpa;
-import com.thanlinardos.resource_server.model.entity.keycloak.KeycloakEventJpa;
+import com.thanlinardos.resource_server.batch.keycloak.event.KeycloakRoleModel;
 import com.thanlinardos.resource_server.model.info.OwnerType;
 import com.thanlinardos.resource_server.model.info.TaskType;
 import com.thanlinardos.resource_server.model.mapped.OwnerModel;
@@ -23,6 +21,7 @@ import com.thanlinardos.resource_server.service.task.TaskRunService;
 import com.thanlinardos.resource_server.service.user.api.UserService;
 import com.thanlinardos.spring_enterprise_library.error.errorcodes.ErrorCode;
 import com.thanlinardos.spring_enterprise_library.error.exceptions.CoreException;
+import com.thanlinardos.spring_enterprise_library.model.entity.base.BasicIdJpa;
 import com.thanlinardos.spring_enterprise_library.objects.utils.CollectionUtils;
 import com.thanlinardos.spring_enterprise_library.spring_cloud_security.exception.KeycloakException;
 import jakarta.annotation.Nullable;
@@ -66,59 +65,59 @@ public class KeycloakEventService {
     private final OauthRoleService roleService;
 
     @ExcludeFromLoggingAspect
-    public <T extends EventPlaceholder> List<T> fetchSortedKeycloakEvents() {
+    public <T extends BasicIdJpa, E extends EventPlaceholder<T>> List<E> fetchSortedKeycloakEvents() {
         return getSortedEvents(fetchEvents(), fetchAdminEvents());
     }
 
-    private <T extends EventPlaceholder> List<T> getSortedEvents(Stream<EventRepresentationPlaceholder> events, Stream<AdminEventRepresentationPlaceholder> adminEvents) {
-        return Stream.concat(((Stream<T>) events), ((Stream<T>) adminEvents))
+    private <T extends BasicIdJpa, E extends EventPlaceholder<T>> List<E> getSortedEvents(Stream<KeycloakEventModel> events, Stream<KeycloakAdminEventModel> adminEvents) {
+        return Stream.concat(((Stream<E>) events), ((Stream<E>) adminEvents))
                 .sorted(Comparator.comparingLong(EventPlaceholder::getTime))
                 .toList();
     }
 
-    private Stream<EventRepresentationPlaceholder> fetchEvents() {
+    private Stream<KeycloakEventModel> fetchEvents() {
         String dateFrom = String.valueOf(getLastEventTime() + 1);
         return keycloakRealm.getEvents(null, null, null, dateFrom, null, null, null, MAX_RESULTS).stream()
-                .map(EventRepresentationPlaceholder::new);
+                .map(KeycloakEventModel::new);
     }
 
-    private Stream<AdminEventRepresentationPlaceholder> fetchAdminEvents() {
+    private Stream<KeycloakAdminEventModel> fetchAdminEvents() {
         String dateFrom = String.valueOf(getLastEventTime() + 1);
         return keycloakRealm.getAdminEvents(null, null, null, null, null, null, null, dateFrom, null, null, MAX_RESULTS).stream()
-                .map(AdminEventRepresentationPlaceholder::new);
+                .map(KeycloakAdminEventModel::new);
     }
 
-    private <T extends EventPlaceholder> boolean shouldProcessKeycloakEvent(T event) {
+    private <T extends BasicIdJpa, E extends EventPlaceholder<T>> boolean shouldProcessKeycloakEvent(E event) {
         return switch (event) {
-            case AdminEventRepresentationPlaceholder adminEvent -> shouldProcessAdminEvent(adminEvent);
-            case EventRepresentationPlaceholder eventPlaceholder -> shouldProcessEvent(eventPlaceholder);
+            case KeycloakAdminEventModel adminEvent -> shouldProcessAdminEvent(adminEvent);
+            case KeycloakEventModel eventPlaceholder -> shouldProcessEvent(eventPlaceholder);
             default -> throw invalidEventClassException(event);
         };
     }
 
-    private <T extends EventPlaceholder> CoreException invalidEventClassException(T event) {
+    private <T extends BasicIdJpa, E extends EventPlaceholder<T>> CoreException invalidEventClassException(E event) {
         return ErrorCode.INVALID_EVENT_CLASS_INSTANCE.createCoreException("An event of unknown class type was provided: {0}", new Object[]{event.getClass().getName()});
     }
 
-    private boolean shouldProcessEvent(EventRepresentationPlaceholder e) {
+    private boolean shouldProcessEvent(KeycloakEventModel e) {
         return e.getType().shouldProcess() && (isNotProcessed(e) || e.isFailed());
     }
 
-    private boolean shouldProcessAdminEvent(AdminEventRepresentationPlaceholder e) {
+    private boolean shouldProcessAdminEvent(KeycloakAdminEventModel e) {
         return isNotProcessed(e) || e.isFailed();
     }
 
-    private Set<RoleRepresentationPlaceholder> parseRoleRepresentations(String representation) {
+    private Set<KeycloakRoleModel> parseRoleRepresentations(String representation) {
         try {
             return ((List<RoleRepresentation>) objectMapper.readerForListOf(RoleRepresentation.class).readValue(representation)).stream()
-                    .map(RoleRepresentationPlaceholder::fromRepresentation)
+                    .map(KeycloakRoleModel::fromRepresentation)
                     .collect(Collectors.toSet());
         } catch (JsonProcessingException e) {
             throw ErrorCode.ILLEGAL_ARGUMENT.createCoreException("Failed to parse roles from event", e);
         }
     }
 
-    private <T extends EventPlaceholder> boolean isNotProcessed(T e) {
+    private <T extends BasicIdJpa, E extends EventPlaceholder<T>> boolean isNotProcessed(E e) {
         return e.getTime() > getLastEventTime();
     }
 
@@ -126,41 +125,41 @@ public class KeycloakEventService {
         return taskRunService.getTaskRunTime(TaskType.KEYCLOAK_EVENT_TASK);
     }
 
-    public <T extends EventPlaceholder> void saveEventIfFailed(T event) {
+    public <T extends BasicIdJpa, E extends EventPlaceholder<T>> void saveEventIfFailed(E event) {
         if (event.isFailed()) {
             saveEvent(event);
         }
     }
 
-    private <T extends EventPlaceholder> void saveEvent(T event) {
+    private <T extends BasicIdJpa, E extends EventPlaceholder<T>> void saveEvent(E event) {
         switch (event) {
-            case AdminEventRepresentationPlaceholder adminEvent ->
-                    adminEventRepository.save(KeycloakAdminEventJpa.fromModel(adminEvent));
-            case EventRepresentationPlaceholder eventPlaceholder ->
-                    eventRepository.save(KeycloakEventJpa.fromModel(eventPlaceholder));
+            case KeycloakAdminEventModel adminEvent ->
+                    adminEventRepository.save(adminEvent.toEntity());
+            case KeycloakEventModel eventPlaceholder ->
+                    eventRepository.save(eventPlaceholder.toEntity());
             default -> throw invalidEventClassException(event);
         }
     }
 
-    private <T extends EventPlaceholder> List<T> getSortedKeycloakFailedEvents() {
+    private <T extends BasicIdJpa, E extends EventPlaceholder<T>> List<E> getSortedKeycloakFailedEvents() {
         return getSortedEvents(getFailedEvents(), getFailedAdminEvents());
     }
 
-    private Stream<EventRepresentationPlaceholder> getFailedEvents() {
+    private Stream<KeycloakEventModel> getFailedEvents() {
         return eventRepository.findAllByStatusIn(EventStatusType.getFailedStatuses()).stream()
-                .map(EventRepresentationPlaceholder::new);
+                .map(KeycloakEventModel::new);
     }
 
-    private Stream<AdminEventRepresentationPlaceholder> getFailedAdminEvents() {
+    private Stream<KeycloakAdminEventModel> getFailedAdminEvents() {
         return adminEventRepository.findAllByStatusIn(EventStatusType.getFailedStatuses()).stream()
-                .map(AdminEventRepresentationPlaceholder::new);
+                .map(KeycloakAdminEventModel::new);
     }
 
-    private <T extends EventPlaceholder> void updateEventToProcessed(T event) {
+    private <T extends BasicIdJpa, E extends EventPlaceholder<T>> void updateEventToProcessed(E event) {
         switch (event) {
-            case AdminEventRepresentationPlaceholder adminEvent ->
+            case KeycloakAdminEventModel adminEvent ->
                     adminEventRepository.updateEventToProcessed(adminEvent.getId());
-            case EventRepresentationPlaceholder eventPlaceholder ->
+            case KeycloakEventModel eventPlaceholder ->
                     eventRepository.updateEventToProcessed(eventPlaceholder.getId());
             default -> throw invalidEventClassException(event);
         }
@@ -168,22 +167,22 @@ public class KeycloakEventService {
     }
 
     @ExcludeFromLoggingAspect
-    public <T extends EventPlaceholder> List<T> processFailedEvents() {
-        List<T> failedEvents = getSortedKeycloakFailedEvents();
+    public <T extends BasicIdJpa, E extends EventPlaceholder<T>> List<E> processFailedEvents() {
+        List<E> failedEvents = getSortedKeycloakFailedEvents();
         processEvents(failedEvents, Collections.emptyList());
         return getFailedEvents(failedEvents);
     }
 
-    private <T extends EventPlaceholder> List<T> getFailedEvents(List<T> events) {
+    private <T extends BasicIdJpa, E extends EventPlaceholder<T>> List<E> getFailedEvents(List<E> events) {
         return events.stream()
                 .filter(EventPlaceholder::isFailed)
                 .toList();
     }
 
     @ExcludeFromLoggingAspect
-    public <T extends EventPlaceholder> void processEvents(List<T> sortedEvents, List<T> failedEvents) {
-        T latestEvent = null;
-        for (T event : sortedEvents) {
+    public <T extends BasicIdJpa, E extends EventPlaceholder<T>> void processEvents(List<E> sortedEvents, List<E> failedEvents) {
+        E latestEvent = null;
+        for (E event : sortedEvents) {
             if (!skipIfHasMatchingFailedEvent(failedEvents, event)) {
                 latestEvent = processEvent(event, latestEvent);
             }
@@ -191,13 +190,13 @@ public class KeycloakEventService {
         updateTaskRunTime(latestEvent);
     }
 
-    private <T extends EventPlaceholder> void updateTaskRunTime(@Nullable T event) {
+    private <T extends BasicIdJpa, E extends EventPlaceholder<T>> void updateTaskRunTime(@Nullable E event) {
         if (event != null) {
             taskRunService.updateTaskRunTime(event.getTaskType(), event.getTime());
         }
     }
 
-    private <T extends EventPlaceholder> T processEvent(T event, T latestEvent) {
+    private <T extends BasicIdJpa, E extends EventPlaceholder<T>> E processEvent(E event, E latestEvent) {
         handleKeycloakEventOrIgnore(event);
         saveEventIfFailed(event);
 
@@ -208,15 +207,15 @@ public class KeycloakEventService {
         }
     }
 
-    private <T extends EventPlaceholder> boolean isNotFailedAndNewerThanLatestEvent(T event, T latestEvent) {
+    private <T extends BasicIdJpa, E extends EventPlaceholder<T>> boolean isNotFailedAndNewerThanLatestEvent(E event, E latestEvent) {
         return !event.isFailed() && isNewerThanLatestEvent(event, latestEvent);
     }
 
-    private <T extends EventPlaceholder> boolean isNewerThanLatestEvent(T event, @Nullable T latestEvent) {
+    private <T extends BasicIdJpa, E extends EventPlaceholder<T>> boolean isNewerThanLatestEvent(E event, @Nullable E latestEvent) {
         return latestEvent == null || latestEvent.getTime() < event.getTime();
     }
 
-    private <T extends EventPlaceholder> boolean skipIfHasMatchingFailedEvent(List<T> failedEvents, T event) {
+    private <T extends BasicIdJpa, E extends EventPlaceholder<T>> boolean skipIfHasMatchingFailedEvent(List<E> failedEvents, E event) {
         if (event.noneMatchingResourceIdOrIsNull(failedEvents)) {
             return false;
         } else {
@@ -224,7 +223,7 @@ public class KeycloakEventService {
         }
     }
 
-    private <T extends EventPlaceholder> boolean ignoreIfAlreadyFailedOrSaveAsFailed(List<T> failedEvents, T event) {
+    private <T extends BasicIdJpa, E extends EventPlaceholder<T>> boolean ignoreIfAlreadyFailedOrSaveAsFailed(List<E> failedEvents, E event) {
         if (event.isContainedInEvents(failedEvents)) {
             logKeycloakEvent(Level.ERROR, event, "Ignored event due to the same existing failed event with uuid", event.getUuid());
             event.setStatus(EventStatusType.IGNORED);
@@ -239,11 +238,11 @@ public class KeycloakEventService {
         }
     }
 
-    private <T extends EventPlaceholder> void handleKeycloakEventOrIgnore(T event) {
+    private <T extends BasicIdJpa, E extends EventPlaceholder<T>> void handleKeycloakEventOrIgnore(E event) {
         if (event.isNotIgnored() && shouldProcessKeycloakEvent(event)) {
             switch (event) {
-                case AdminEventRepresentationPlaceholder adminEvent -> tryHandleAdminEvent(adminEvent);
-                case EventRepresentationPlaceholder eventPlaceholder -> tryHandleEvent(eventPlaceholder);
+                case KeycloakAdminEventModel adminEvent -> tryHandleAdminEvent(adminEvent);
+                case KeycloakEventModel eventPlaceholder -> tryHandleEvent(eventPlaceholder);
                 default -> throw invalidEventClassException(event);
             }
         } else {
@@ -251,7 +250,7 @@ public class KeycloakEventService {
         }
     }
 
-    private void tryHandleEvent(EventRepresentationPlaceholder event) {
+    private void tryHandleEvent(KeycloakEventModel event) {
         log.trace("Keycloak event: {}", event);
         try {
             handleEvent(event);
@@ -262,7 +261,7 @@ public class KeycloakEventService {
         }
     }
 
-    private <T extends EventPlaceholder> void updateEventStatusAfterProcessing(T event) {
+    private <T extends BasicIdJpa, E extends EventPlaceholder<T>> void updateEventStatusAfterProcessing(E event) {
         if (event.getStatus().equals(EventStatusType.RECEIVED)) {
             event.setStatus(EventStatusType.PROCESSED);
         } else if (event.getId() != null && event.isFailed()) {
@@ -270,7 +269,7 @@ public class KeycloakEventService {
         }
     }
 
-    private void handleEvent(EventRepresentationPlaceholder event) {
+    private void handleEvent(KeycloakEventModel event) {
         switch (event.getType()) {
             case REGISTER -> getGuestOwnerByEmailAndPersist(event);
             case UPDATE_TOTP, SEND_VERIFY_EMAIL ->
@@ -279,7 +278,7 @@ public class KeycloakEventService {
         }
     }
 
-    private void getGuestOwnerByEmailAndPersist(EventRepresentationPlaceholder event) {
+    private void getGuestOwnerByEmailAndPersist(KeycloakEventModel event) {
         String email = event.getDetails().get(EMAIL);
         if (ownerService.ownerExistsByName(email)) {
             logEvent(Level.WARN, event, "Failed to register guest user. A user already exists with email", email);
@@ -289,7 +288,7 @@ public class KeycloakEventService {
         }
     }
 
-    private void tryHandleAdminEvent(AdminEventRepresentationPlaceholder event) {
+    private void tryHandleAdminEvent(KeycloakAdminEventModel event) {
         log.trace("Keycloak admin event: {}", event);
         try {
             validateEvent(event);
@@ -306,12 +305,12 @@ public class KeycloakEventService {
         }
     }
 
-    private void ignoreResourceType(AdminEventRepresentationPlaceholder event) {
+    private void ignoreResourceType(KeycloakAdminEventModel event) {
         logAdminEvent(Level.WARN, event, "Unhandled resource type", event.getResourceType());
         event.setStatus(EventStatusType.IGNORED);
     }
 
-    private void validateEvent(AdminEventRepresentationPlaceholder event) throws KeycloakException {
+    private void validateEvent(KeycloakAdminEventModel event) throws KeycloakException {
         if (event.getResourceType() == null) {
             throw new KeycloakException("Resource type is null: " + event);
         }
@@ -320,11 +319,11 @@ public class KeycloakEventService {
         }
     }
 
-    private boolean isNotValidResourceId(AdminEventRepresentationPlaceholder event) {
+    private boolean isNotValidResourceId(KeycloakAdminEventModel event) {
         return event.getResourceType().hasResourceId() && event.getResourceIdType() == null || event.getResourceId() == null;
     }
 
-    private void handleUserEvent(AdminEventRepresentationPlaceholder event) {
+    private void handleUserEvent(KeycloakAdminEventModel event) {
         UUID userId = event.getResourceId();
         switch (event.getOperationType()) {
             case DELETE -> ownerService.delete(userId)
@@ -335,17 +334,17 @@ public class KeycloakEventService {
         }
     }
 
-    private void handleUserAction(AdminEventRepresentationPlaceholder event) {
+    private void handleUserAction(KeycloakAdminEventModel event) {
         logAdminEvent(Level.TRACE, event, "Unhandled action operation", event.getResourcePath());
         event.setStatus(EventStatusType.IGNORED);
     }
 
-    private void handleOwnerUpdate(AdminEventRepresentationPlaceholder event, UUID ownerUuid, OwnerType ownerType) {
+    private void handleOwnerUpdate(KeycloakAdminEventModel event, UUID ownerUuid, OwnerType ownerType) {
         OwnerModel ownerModel = userService.getOwnerByIdAndPersistOrUpdate(ownerUuid, ownerType);
         logAdminEvent(Level.INFO, event, "Updated " + lowerCaseName(ownerType), ownerModel);
     }
 
-    private void handleOwnerCreation(AdminEventRepresentationPlaceholder event, UUID ownerUuid, OwnerType ownerType) {
+    private void handleOwnerCreation(KeycloakAdminEventModel event, UUID ownerUuid, OwnerType ownerType) {
         if (!ownerService.ownerExistsByUuid(ownerUuid)) {
             OwnerModel owner = userService.getOwnerByIdAndPersistOrUpdate(ownerUuid, ownerType);
             logAdminEvent(Level.INFO, event, "Created " + lowerCaseName(ownerType), owner);
@@ -356,7 +355,7 @@ public class KeycloakEventService {
         return type.name().toLowerCase();
     }
 
-    private void handleClientEvent(AdminEventRepresentationPlaceholder event) {
+    private void handleClientEvent(KeycloakAdminEventModel event) {
         UUID clientId = event.getResourceId();
         switch (event.getOperationType()) {
             case DELETE -> ownerService.delete(clientId)
@@ -367,7 +366,7 @@ public class KeycloakEventService {
         }
     }
 
-    private void handleRealmRoleMapping(AdminEventRepresentationPlaceholder event) {
+    private void handleRealmRoleMapping(KeycloakAdminEventModel event) {
         event.setRoles(parseRoleRepresentations(event.getRepresentation()));
         Set<RoleModel> roles = parseRolesFromEvent(event);
         if (roles.isEmpty()) {
@@ -387,7 +386,7 @@ public class KeycloakEventService {
         }
     }
 
-    private void addRolesAndUpdateOwner(AdminEventRepresentationPlaceholder event, OwnerModel owner, Collection<RoleModel> roles) {
+    private void addRolesAndUpdateOwner(KeycloakAdminEventModel event, OwnerModel owner, Collection<RoleModel> roles) {
         if (new HashSet<>(owner.getRoles()).containsAll(roles)) {
             logAdminEvent(Level.WARN, event, "Owner already has roles", roles);
         } else {
@@ -397,7 +396,7 @@ public class KeycloakEventService {
         }
     }
 
-    private void deleteRolesAndUpdateOwner(AdminEventRepresentationPlaceholder event, OwnerModel owner, Collection<RoleModel> roles) {
+    private void deleteRolesAndUpdateOwner(KeycloakAdminEventModel event, OwnerModel owner, Collection<RoleModel> roles) {
         Set<RoleModel> finalRoles = CollectionUtils.subtractToSet(owner.getRoles(), roles);
         if (finalRoles.equals(roles)) {
             logAdminEvent(Level.WARN, event, "Owner doesn't have these roles to remove", roles);
@@ -408,32 +407,32 @@ public class KeycloakEventService {
         }
     }
 
-    private <T extends EventPlaceholder> void logKeycloakEvent(Level level, T event, String message, Object parsedResource) {
+    private <T extends BasicIdJpa, E extends EventPlaceholder<T>> void logKeycloakEvent(Level level, E event, String message, Object parsedResource) {
         switch (event) {
-            case AdminEventRepresentationPlaceholder adminEvent ->
+            case KeycloakAdminEventModel adminEvent ->
                     logAdminEvent(level, adminEvent, message, parsedResource);
-            case EventRepresentationPlaceholder eventPlaceholder ->
+            case KeycloakEventModel eventPlaceholder ->
                     logEvent(level, eventPlaceholder, message, parsedResource);
             default -> throw invalidEventClassException(event);
         }
     }
 
-    private void logEvent(Level level, EventRepresentationPlaceholder event, String message, Object parsedResource) {
+    private void logEvent(Level level, KeycloakEventModel event, String message, Object parsedResource) {
         log.atLevel(level).log("[KEYCLOAK_EVENT][{}] {}: {}", event.getType(), message, parsedResource);
     }
 
-    private void logAdminEvent(Level level, AdminEventRepresentationPlaceholder event, String message, Object parsedResource) {
+    private void logAdminEvent(Level level, KeycloakAdminEventModel event, String message, Object parsedResource) {
         log.atLevel(level).log("[KEYCLOAK_ADMIN_EVENT][{} {}] {}: {}", event.getOperationType(), event.getResourceType(), message, parsedResource);
     }
 
-    public Set<RoleModel> parseRolesFromEvent(AdminEventRepresentationPlaceholder event) {
+    public Set<RoleModel> parseRolesFromEvent(KeycloakAdminEventModel event) {
         Set<String> roleNames = getRolesNamesFromEvent(event);
         return new HashSet<>(roleService.findRolesWithoutValidation(roleNames));
     }
 
-    private Set<String> getRolesNamesFromEvent(AdminEventRepresentationPlaceholder event) {
+    private Set<String> getRolesNamesFromEvent(KeycloakAdminEventModel event) {
         return event.getRoles().stream()
-                .map(RoleRepresentationPlaceholder::getName)
+                .map(KeycloakRoleModel::getName)
                 .collect(Collectors.toSet());
     }
 }

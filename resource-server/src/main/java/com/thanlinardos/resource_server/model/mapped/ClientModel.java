@@ -1,6 +1,7 @@
 package com.thanlinardos.resource_server.model.mapped;
 
 import com.thanlinardos.resource_server.model.entity.owner.ClientJpa;
+import com.thanlinardos.resource_server.model.entity.owner.OwnerJpa;
 import com.thanlinardos.resource_server.model.mapped.base.BasicAuditableModel;
 import com.thanlinardos.spring_enterprise_library.spring_cloud_security.model.base.PrivilegedResource;
 import lombok.Data;
@@ -15,7 +16,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @SuperBuilder
-public class ClientModel extends BasicAuditableModel implements Serializable, PrivilegedResource {
+public class ClientModel extends BasicAuditableModel<ClientJpa> implements Serializable, PrivilegedResource {
 
     private UUID uuid;
     private UUID serviceAccountId;
@@ -37,5 +38,25 @@ public class ClientModel extends BasicAuditableModel implements Serializable, Pr
     @Override
     public String getPrincipalName() {
         return name;
+    }
+
+    @Override
+    public ClientJpa toEntityOnlyId() {
+        return ClientJpa.builder().id(getId()).build(); //NOSONAR (S3252)
+    }
+
+    public ClientJpa toEntity() {
+        return ClientJpa.builder() //NOSONAR (S3252)
+                .id(getId())
+                .name(getName())
+                .category(getCategory())
+                .serviceAccountId(getServiceAccountId())
+                .owner(OwnerJpa.builder().id(getOwnerId()).build())
+                .build();
+    }
+
+    @Override
+    public ClientModel fromEntity(ClientJpa entity) {
+        return new ClientModel(entity);
     }
 }

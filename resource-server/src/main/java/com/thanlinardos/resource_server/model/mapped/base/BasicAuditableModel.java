@@ -2,6 +2,7 @@ package com.thanlinardos.resource_server.model.mapped.base;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thanlinardos.resource_server.model.entity.base.BasicAuditableJpa;
+import com.thanlinardos.spring_enterprise_library.model.entity.base.BasicIdJpa;
 import com.thanlinardos.spring_enterprise_library.model.mapped.base.BasicIdModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @SuperBuilder
-public class BasicAuditableModel extends BasicIdModel {
+public abstract class BasicAuditableModel<T extends BasicIdJpa> extends BasicIdModel<T, BasicAuditableModel<T>> {
 
     @JsonIgnore
     @EqualsAndHashCode.Exclude
@@ -29,7 +30,7 @@ public class BasicAuditableModel extends BasicIdModel {
     @EqualsAndHashCode.Exclude
     private String updatedBy;
 
-    public BasicAuditableModel() {
+    protected BasicAuditableModel() {
     }
 
     protected BasicAuditableModel(BasicAuditableJpa entity) {

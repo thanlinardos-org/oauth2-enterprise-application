@@ -14,7 +14,7 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @SuperBuilder
-public class ContactMessageModel extends BasicIdModel implements Serializable {
+public class ContactMessageModel extends BasicIdModel<ContactMessageJpa, ContactMessageModel> implements Serializable {
 
     private String contactId;
     private String contactName;
@@ -38,5 +38,26 @@ public class ContactMessageModel extends BasicIdModel implements Serializable {
         this.setContactEmail(entity.getContactEmail());
         this.setSubject(entity.getSubject());
         this.setMessage(entity.getMessage());
+    }
+
+    @Override
+    public ContactMessageJpa toEntityOnlyId() {
+        return ContactMessageJpa.builder().id(getId()).build(); //NOSONAR (S3252)
+    }
+
+    public ContactMessageJpa toEntity() {
+        return ContactMessageJpa.builder() //NOSONAR (S3252)
+                .id(getId())
+                .contactId(getContactId())
+                .contactName(getContactName())
+                .contactEmail(getContactEmail())
+                .subject(getSubject())
+                .message(getMessage())
+                .build();
+    }
+
+    @Override
+    public ContactMessageModel fromEntity(ContactMessageJpa entity) {
+        return new ContactMessageModel(entity);
     }
 }

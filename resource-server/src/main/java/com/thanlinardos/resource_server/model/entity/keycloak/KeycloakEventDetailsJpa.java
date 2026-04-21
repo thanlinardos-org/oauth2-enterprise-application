@@ -37,8 +37,8 @@ public class KeycloakEventDetailsJpa extends BasicIdJpa {
     @Nullable
     private String val;
 
-    public static KeycloakEventDetailsJpa fromModel(Map.Entry<String, String> entry) {
-        return KeycloakEventDetailsJpa.builder()
+    public static KeycloakEventDetailsJpa fromMap(Map.Entry<String, String> entry) {
+        return KeycloakEventDetailsJpa.builder() //NOSONAR (S3252)
                 .name(entry.getKey())
                 .val(entry.getValue())
                 .build();

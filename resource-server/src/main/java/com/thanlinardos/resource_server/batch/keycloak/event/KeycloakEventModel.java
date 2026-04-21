@@ -16,14 +16,16 @@ import java.util.UUID;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
-public class EventRepresentationPlaceholder extends EventPlaceholder {
+public class KeycloakEventModel extends EventPlaceholder<KeycloakEventJpa> {
 
     private KeycloakUserEventType type;
-    @Nullable private UUID clientId;
-    @Nullable private UUID userId;
+    @Nullable
+    private UUID clientId;
+    @Nullable
+    private UUID userId;
     private Map<String, String> details;
 
-    public EventRepresentationPlaceholder(EventRepresentation event) {
+    public KeycloakEventModel(EventRepresentation event) {
         super(UUID.fromString(event.getId()), event.getTime(), EventStatusType.RECEIVED, UUID.fromString(event.getRealmId()), event.getError());
         setType(KeycloakUserEventType.fromValue(event.getType()));
         if (event.getClientUuid() == null) {
@@ -34,7 +36,7 @@ public class EventRepresentationPlaceholder extends EventPlaceholder {
         setDetails(event.getDetails());
     }
 
-    public EventRepresentationPlaceholder(KeycloakEventJpa entity) {
+    public KeycloakEventModel(KeycloakEventJpa entity) {
         super(entity.getUuid(), entity.getId(), DateUtils.getEpochMilliFromLocalDateTime(entity.getTime()), entity.getStatus(), entity.getRealmId(), entity.getError());
         this.type = entity.getType();
         this.clientId = entity.getClientId();
@@ -46,6 +48,33 @@ public class EventRepresentationPlaceholder extends EventPlaceholder {
     public UUID getResourceId() {
         return Optional.ofNullable(getUserId())
                 .orElse(getClientId());
+    }
+
+    @Override
+    public KeycloakEventJpa toEntityOnlyId() {
+        return KeycloakEventJpa.builder().id(getId()).build(); //NOSONAR (S3252)
+    }
+
+    public KeycloakEventJpa toEntity() {
+        KeycloakEventJpa entity = KeycloakEventJpa.builder() //NOSONAR (S3252)
+                .time(DateUtils.getLocalDateTimeFromEpochMilli(getTime()))
+                .status(getStatus())
+                .realmId(getRealmId())
+                .error(getError())
+                .type(getType())
+                .clientId(getClientId())
+                .userId(getUserId())
+                .build();
+
+        getDetails().entrySet().stream()
+                .map(KeycloakEventDetailsJpa::fromMap)
+                .forEach(entity::addDetailWithLink);
+        return entity;
+    }
+
+    @Override
+    public KeycloakEventModel fromEntity(KeycloakEventJpa entity) {
+        return new KeycloakEventModel(entity);
     }
 
     @Override

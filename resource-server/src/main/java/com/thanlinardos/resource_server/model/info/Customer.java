@@ -45,7 +45,7 @@ public class Customer extends OwnerDetailsInfo implements Serializable {
 
     private Set<RoleModel> getRoleModels(Set<String> roleNames) {
         return roleNames.stream()
-                .map(role -> RoleModel.builder().role(role).build())
+                .map(role -> RoleModel.builder().role(role).build()) //NOSONAR (S3252)
                 .collect(Collectors.toSet());
     }
 

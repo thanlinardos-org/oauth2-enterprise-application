@@ -55,7 +55,7 @@ class OwnerServiceTest {
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @WithMockCustomUser(name = "admin@email.com", roles = {ROLE_USER, ROLE_MANAGER, ROLE_ADMIN, ROLE_OWNER})
     void save() {
-        OwnerModel expected = OwnerModel.builder()
+        OwnerModel expected = OwnerModel.builder() //NOSONAR (S3252)
                 .type(OwnerType.CUSTOMER)
                 .uuid(UUID.randomUUID())
                 .principalName("test@email.com")

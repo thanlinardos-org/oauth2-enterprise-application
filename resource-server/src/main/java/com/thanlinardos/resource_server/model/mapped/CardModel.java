@@ -12,11 +12,13 @@ import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
 
+import static com.thanlinardos.spring_enterprise_library.spring_cloud_security.utils.EntityUtils.buildEntityWithIdOrNull;
+
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 @SuperBuilder
-public class CardModel extends BasicIdModel implements Serializable, OwnedResource<CardModel> {
+public class CardModel extends BasicIdModel<CardJpa, CardModel> implements Serializable, OwnedResource<CardModel> {
 
     private String cardNumber;
     private Long accountId;
@@ -39,5 +41,26 @@ public class CardModel extends BasicIdModel implements Serializable, OwnedResour
             this.setAccountId(entity.getAccount().getId());
             this.setOwner(new OwnerModel(entity.getAccount().getOwner()));
         }
+    }
+
+    @Override
+    public CardJpa toEntityOnlyId() {
+        return CardJpa.builder().id(getId()).build(); //NOSONAR (S3252)
+    }
+
+    public CardJpa toEntity() {
+        return CardJpa.builder() //NOSONAR (S3252)
+                .cardNumber(getCardNumber())
+                .cardType(getCardType())
+                .totalLimit(getTotalLimit())
+                .amountUsed(getAmountUsed())
+                .availableAmount(getAvailableAmount())
+                .account(buildEntityWithIdOrNull(getAccountId()))
+                .build();
+    }
+
+    @Override
+    public CardModel fromEntity(CardJpa entity) {
+        return new CardModel(entity);
     }
 }
