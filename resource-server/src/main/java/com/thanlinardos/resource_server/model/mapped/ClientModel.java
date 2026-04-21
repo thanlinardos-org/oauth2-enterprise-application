@@ -51,7 +51,7 @@ public class ClientModel extends BasicAuditableModel<ClientJpa> implements Seria
                 .name(getName())
                 .category(getCategory())
                 .serviceAccountId(getServiceAccountId())
-                .owner(OwnerJpa.builder().id(getOwnerId()).build())
+                .owner(OwnerJpa.builder().id(getOwnerId()).build()) //NOSONAR (S3252)
                 .build();
     }
 
